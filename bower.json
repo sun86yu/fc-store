@@ -1,0 +1,29 @@
+{
+  "name": "my-laravel",
+  "description": "",
+  "main": "",
+  "authors": [
+    "sunyu <sunvipyu@gmail.com>"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/easy-swoole/demo",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "assets/components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "jquery": "^3.3.1",
+    "font-awesome": "^4.7.0",
+    "summernote": "^0.8.10",
+    "datatables.net-bs": "^2.1.1",
+    "jquery-ui": "^1.12.1",
+    "Ionicons": "ionicons#^2.0.1",
+    "bootstrap": "^3.3.7",
+    "fastclick": "^1.0.6",
+    "jquery-slimscroll": "slimscroll#^1.3.8"
+  }
+}

@@ -1,0 +1,9 @@
+/storage/*.key
+/vendor
+README.md
+.idea
+/node_modules
+/assets/components
+/public/admin
+/public/components
+/tests

@@ -9,7 +9,6 @@
 
 namespace App\Jobs;
 
-use App\Models\Admin\AdminModel;
 use App\Models\Admin\LogModel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;

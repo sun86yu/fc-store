@@ -32,10 +32,10 @@ Route::prefix('admin')->group(function () {
     Route::get('catmodule', 'Admin\CategoryController@module')->name('admin_category_module');
     Route::get('catconst', 'Admin\CategoryController@consts')->name('admin_category_const');
 
-    Route::get('geos', 'Admin\GeoController@index')->name('admin_geo_lsit');
+    Route::get('geos', 'Admin\GeoController@index')->name('admin_geo_list');
 
-    Route::get('articles', 'Admin\ArticleController@index')->name('admin_geo_lsit');
-    Route::get('articleadd', 'Admin\ArticleController@create')->name('admin_geo_lsit');
+    Route::get('articles', 'Admin\ArticleController@index')->name('admin_article_list');
+    Route::get('articleadd', 'Admin\ArticleController@create')->name('admin_article_add');
 
-    Route::get('logs', 'Admin\LogController@index')->name('admin_geo_lsit');
+    Route::match(['get', 'post'], 'logs', 'Admin\LogController@index')->name('admin_logs_list');
 });

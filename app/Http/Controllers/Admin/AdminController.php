@@ -8,11 +8,9 @@ use App\Models\Admin\AdminModel;
 use App\Models\Admin\RoleModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\DB;
 use App\Services\RightTools;
 use Illuminate\Support\Facades\Request as RequestFacade;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
 
 class AdminController extends Controller
@@ -66,7 +64,7 @@ class AdminController extends Controller
         $roleList = RoleModel::all();
 
         $adminActive = true;
-        return view('Admin/User/admins', compact('adminActive', 'lists', 'moduleLists', 'roleList', 'pageTitle', 'subTitle', 'moduleName', 'moduleUrl', 'funcName'));
+        return view('Admin/User/admins', array_merge(compact('adminActive', 'lists', 'moduleLists', 'roleList'), $this->getCommonParm()));
     }
 
     public function role()
@@ -83,7 +81,7 @@ class AdminController extends Controller
         $moduleLists = Config::get('constants.MODULE_LIST');
 
         $roleActive = true;
-        return view('Admin/User/admin_role', compact('roleActive', 'lists', 'moduleLists', 'pageTitle', 'subTitle', 'moduleName', 'moduleUrl', 'funcName'));
+        return view('Admin/User/admin_role', array_merge(compact('roleActive', 'lists', 'moduleLists'), $this->getCommonParm()));
     }
 
     /**
@@ -111,7 +109,7 @@ class AdminController extends Controller
                 ->update(['status' => 0]);
 
             $act['user_id'] = $nowUserId;
-            $act['action_type'] = $actionList[$this->moduleKey]['delete'];
+            $act['action_type'] = $actionList[$this->moduleKey]['deleteUser'];
             $act['act_time'] = date('Y-m-d H:i:s');
             $act['is_admin'] = 1;
             $act['action_detail'] = '禁用管理员';
@@ -170,14 +168,14 @@ class AdminController extends Controller
                 AdminModel::where('id', $data['admin_id'])
                     ->update($input);
 
-                $act['action_type'] = $actionList[$this->moduleKey]['edit'];
+                $act['action_type'] = $actionList[$this->moduleKey]['editUser'];
                 $act['action_detail'] = '编辑管理员信息';
                 $act['target_id'] = $data['admin_id'];
 
             } else {
                 $newAdmin = AdminModel::create($input);
 
-                $act['action_type'] = $actionList[$this->moduleKey]['create'];
+                $act['action_type'] = $actionList[$this->moduleKey]['createUser'];
                 $act['action_detail'] = '创建新管理员';
                 $act['target_id'] = $newAdmin->id;
 
@@ -247,7 +245,7 @@ class AdminController extends Controller
                 RoleModel::where('id', $data['role_id'])
                     ->update(['role_name' => $data['role_name'], 'role_right' => $rightTools->getRightValue($data)]);
 
-                $act['action_type'] = $actionList['role']['edit'];
+                $act['action_type'] = $actionList[$this->moduleKey]['editRole'];
                 $act['action_detail'] = '编辑角色';
                 $act['target_id'] = $data['role_id'];
             } else {
@@ -258,7 +256,7 @@ class AdminController extends Controller
 
                 $item->save();
 
-                $act['action_type'] = $actionList['role']['create'];
+                $act['action_type'] = $actionList[$this->moduleKey]['createRole'];
                 $act['action_detail'] = '新建角色';
                 $act['target_id'] = $item->id;
             }
@@ -271,7 +269,7 @@ class AdminController extends Controller
             RoleModel::destroy($id);
 
             $act['user_id'] = $nowUserId;
-            $act['action_type'] = $actionList['role']['delete'];
+            $act['action_type'] = $actionList[$this->moduleKey]['deleteRole'];
             $act['act_time'] = date('Y-m-d H:i:s');
             $act['is_admin'] = 1;
             $act['action_detail'] = '删除角色';

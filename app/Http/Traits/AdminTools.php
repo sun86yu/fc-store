@@ -24,4 +24,15 @@ trait AdminTools
     public $pageFuncName = '';
 
     public $moduleKey;
+
+    public function getCommonParm()
+    {
+        $pageTitle = $this->pageTitle;
+        $subTitle = $this->pageSubTitle;
+        $moduleName = $this->pageModuleName;
+        $moduleUrl = $this->pageModuleUrl;
+        $funcName = $this->pageFuncName;
+
+        return compact('pageTitle', 'subTitle', 'moduleName', 'moduleUrl', 'funcName');
+    }
 }

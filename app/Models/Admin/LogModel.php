@@ -18,7 +18,7 @@ class LogModel extends Model
      */
     protected $fillable = ['user_id', 'action_type', 'act_time', 'is_admin', 'action_detail', 'target_id'];
 
-    public function role()
+    public function admin()
     {
         return $this->belongsTo('App\Models\Admin\AdminModel', 'user_id', 'id');
     }

@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'FangCun-STORE'),
 
     /*
     |--------------------------------------------------------------------------
@@ -161,6 +161,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         App\Providers\StringServiceProvider::class,
         App\Providers\ShareDataProvider::class,
+        App\Providers\RoleRightProvider::class,
 
     ],
 

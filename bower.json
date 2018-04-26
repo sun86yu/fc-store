@@ -21,6 +21,7 @@
     "summernote": "^0.8.10",
     "datatables.net-bs": "^2.1.1",
     "jquery-ui": "^1.12.1",
+    "jquery-validation": "1.17.0",
     "Ionicons": "ionicons#^2.0.1",
     "bootstrap": "^3.3.7",
     "fastclick": "^1.0.6",

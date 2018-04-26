@@ -86,6 +86,11 @@ module.exports = function () {
             .pipe(gulp.dest(path.join(dist_path, 'datatables.net-bs/')));
     });
 
+    gulp.task('bower:jq-validate', function () {
+        return gulp.src(path.join(bower_path, 'jquery-validation/dist/{jquery.validate.min.js,additional-methods.min.js}'))
+            .pipe(gulp.dest(path.join(dist_path, 'jquery-validation/')));
+    });
+
     gulp.task('bower:clean', function () {
         return gulp.src(dist_path)
             .pipe(clean());
@@ -104,6 +109,7 @@ module.exports = function () {
         'bower:slimscroll',
         'bower:summernote',
         'bower:datatables',
+        'bower:jq-validate',
     ]))
 };
 

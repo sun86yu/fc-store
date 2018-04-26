@@ -3,51 +3,87 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Traits\AdminTools;
+use App\Jobs\LogAction;
+use App\Models\Admin\AdminModel;
+use App\Models\Admin\RoleModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use App\Services\RightTools;
+use Illuminate\Support\Facades\Request as RequestFacade;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
 
 class AdminController extends Controller
 {
     use AdminTools;
+
+    public function __construct()
+    {
+        $this->moduleKey = 'admin';
+    }
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         //
+        $pageTitle = $this->pageTitle = '管理员列表';
+        $subTitle = $this->pageSubTitle = '管理后台所有管理员';
+        $moduleName = $this->pageModuleName = '管理员';
+        $moduleUrl = $this->pageModuleUrl = route('admin_user_list');
+        $funcName = $this->pageFuncName = '管理员列表';
+
+        $where = [];
+        if ($request->isMethod('POST')) {
+            $data = $request->post();
+
+            if (RequestFacade::has('search_status') && $data['search_status'] != -1) {
+                $where['status'] = $data['search_status'];
+            }
+
+            if (RequestFacade::has('search_role_id') && $data['search_role_id'] != -1) {
+                $where['role_id'] = $data['search_role_id'];
+            }
+
+            if (RequestFacade::has('search_name') && trim($data['search_name']) != "") {
+                $where[] = ['nick_name', 'like', '%' . $data['search_name'] . '%'];
+            }
+
+//            $request->flashOnly('search_status', 'search_role_id', 'search_name');
+        }
         $moduleLists = Config::get('constants.MODULE_LIST');
 
-        $lists = DB::table('t_admin as a')
-            ->join('t_role as r', 'a.role_id', '=', 'r.id')
-            ->select('a.*', 'r.role_name')
-            ->paginate(2);
+//        DB::connection()->enableQueryLog();
+        $lists = AdminModel::where($where)->with('role')->paginate($this->pageSize);
+
+//        $log = DB::getQueryLog();
+//        print_r($log);
+        $roleList = RoleModel::all();
 
         $adminActive = true;
-        return view('Admin/User/admins', compact('adminActive', 'lists', 'moduleLists'));
+        return view('Admin/User/admins', compact('adminActive', 'lists', 'moduleLists', 'roleList', 'pageTitle', 'subTitle', 'moduleName', 'moduleUrl', 'funcName'));
     }
 
     public function role()
     {
         //
-        $lists = DB::table('t_role')->paginate(2);
+        $pageTitle = $this->pageTitle = '管理员角色列表';
+        $subTitle = $this->pageSubTitle = '管理后台所有管理员角色';
+        $moduleName = $this->pageModuleName = '管理员';
+        $moduleUrl = $this->pageModuleUrl = route('admin_user_list');
+        $funcName = $this->pageFuncName = '角色列表';
+
+        $lists = RoleModel::with('user')->paginate($this->pageSize);
+
         $moduleLists = Config::get('constants.MODULE_LIST');
 
         $roleActive = true;
-        return view('Admin/User/admin_role', compact('roleActive', 'lists', 'moduleLists'));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        return view('Admin/User/admin_role', compact('roleActive', 'lists', 'moduleLists', 'pageTitle', 'subTitle', 'moduleName', 'moduleUrl', 'funcName'));
     }
 
     /**
@@ -56,9 +92,104 @@ class AdminController extends Controller
      * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
-    public function showadmin(Request $request, $id)
+    public function adminfunc(Request $request, $id)
     {
         //
+        $rst = [];
+
+        $nowUserId = $this->getNowUser();
+        $actionList = Config::get('constants.ACTION_LIST');
+        $queueName = Config::get('constants.LOG_QUEUE_NAME');
+
+        if ($request->ajax() && $request->isMethod('GET')) {
+            $admin = AdminModel::with('role')->find($id);
+
+            $rst['code'] = 100;
+            $rst['data'] = $admin;
+        } else if ($request->ajax() && $request->isMethod('DELETE')) {
+            AdminModel::where('id', $id)
+                ->update(['status' => 0]);
+
+            $act['user_id'] = $nowUserId;
+            $act['action_type'] = $actionList[$this->moduleKey]['delete'];
+            $act['act_time'] = date('Y-m-d H:i:s');
+            $act['is_admin'] = 1;
+            $act['action_detail'] = '禁用管理员';
+            $act['target_id'] = $id;
+
+            LogAction::dispatch($act)->onQueue($queueName);
+
+            $rst['code'] = 100;
+        } else if ($request->isMethod('POST')) {
+            $data = $request->post();
+
+            if ($data['admin_pwd'] != $data['admin_pwd2']) {
+                $rst['code'] = 0;
+                $rst['data']['error'] = '重复密码必须和密码相同!';
+
+                return json_encode($rst);
+            }
+
+            // 名称长度检测
+            $input = [
+                'admin_name' => $data['admin_name'],
+                'admin_pwd' => $data['admin_pwd'],
+                'admin_email' => $data['admin_email'],
+                'nick_name' => $data['nick_name'],
+            ];
+            $rules = [
+                'admin_name' => 'required|max:45',
+                'admin_pwd' => 'required|max:45',
+                'admin_email' => 'required|max:200',
+                'nick_name' => 'required|max:45',
+            ];
+            $messages = [
+                'required' => ':attribute 值必须填写.',
+                'max' => ':attribute 长度不能超过 :max.',
+            ];
+
+            $validator = Validator::make($input, $rules, $messages);
+
+            if ($validator->fails()) {
+                $rst['code'] = 0;
+                $rst['data']['error'] = $validator->errors()->first();
+
+                return json_encode($rst);
+            }
+
+            $input['status'] = $data['status'];
+            $input['role_id'] = $data['role_id'];
+            $input['admin_pwd'] = md5($data['role_id']);
+            $input['create_time'] = date('Y-m-d H:i:s');
+
+            $act['user_id'] = $nowUserId;
+            $act['act_time'] = date('Y-m-d H:i:s');
+            $act['is_admin'] = 1;
+
+            if ($data['admin_id'] > 0) {
+                AdminModel::where('id', $data['admin_id'])
+                    ->update($input);
+
+                $act['action_type'] = $actionList[$this->moduleKey]['edit'];
+                $act['action_detail'] = '编辑管理员信息';
+                $act['target_id'] = $data['admin_id'];
+
+            } else {
+                $newAdmin = AdminModel::create($input);
+
+                $act['action_type'] = $actionList[$this->moduleKey]['create'];
+                $act['action_detail'] = '创建新管理员';
+                $act['target_id'] = $newAdmin->id;
+
+            }
+
+            LogAction::dispatch($act)->onQueue($queueName);
+
+            $rst['code'] = 100;
+            return json_encode($rst);
+        }
+
+        return json_encode($rst);
     }
 
     /**
@@ -67,77 +198,90 @@ class AdminController extends Controller
      * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function showrole(Request $request, $id)
+    public function rolefunc(Request $request, RightTools $rightTools, $id)
     {
         //
         $rst = [];
+
+        $nowUserId = $this->getNowUser();
+        $actionList = Config::get('constants.ACTION_LIST');
+        $queueName = Config::get('constants.LOG_QUEUE_NAME');
+
         if ($request->ajax() && $request->isMethod('GET')) {
 
-            $role = DB::table('t_role')->find($id);
-
-            $moduleLists = Config::get('constants.MODULE_LIST');
-
-            $rightBin = decbin($role->role_right);
-            $rightBin = str_pad($rightBin, count($moduleLists), '0', STR_PAD_LEFT);
-
-            $idx = 0;
-            $right = [];
-            foreach ($moduleLists as $key => $name) {
-                if ($rightBin[$idx] == 1) {
-                    $right[$key] = 1;
-                } else {
-                    $right[$key] = 0;
-                }
-                $idx++;
-            }
+            $role = RoleModel::find($id);
 
             $rst['code'] = 100;
             $rst['data']['name'] = $role->role_name;
-            $rst['data']['right'] = $right;
+            $rst['data']['right'] = $rightTools->getRightList($role->role_right);
         } else if ($request->isMethod('POST')) {
-            $moduleLists = Config::get('constants.MODULE_LIST');
-
             $data = $request->post();
 
-            $rightStr = str_pad('', count($moduleLists), '0', STR_PAD_LEFT);
-            $idx = 0;
-            foreach ($moduleLists as $key => $module) {
-                if (array_key_exists('role_right_' . $key, $data) && $data['role_right_' . $key] == 'on') {
-                    $rightStr[$idx] = 1;
-                }
-                $idx++;
+            // 名称长度检测
+            $input = [
+                'role_name' => $data['role_name']
+            ];
+            $rules = [
+                'role_name' => 'required|max:45',
+            ];
+            $messages = [
+                'required' => ':attribute 值必须填写.',
+                'max' => ':attribute 长度不能超过 :max.',
+            ];
+
+            $validator = Validator::make($input, $rules, $messages);
+
+            if ($validator->fails()) {
+                $rst['code'] = 0;
+                $rst['data']['error'] = $validator->errors()->first('role_name');
+
+                return json_encode($rst);
             }
+
+
+            $act['user_id'] = $nowUserId;
+            $act['act_time'] = date('Y-m-d H:i:s');
+            $act['is_admin'] = 1;
 
             if ($data['role_id'] > 0) {
-                DB::table('t_role')
-                    ->where('id', $data['role_id'])
-                    ->update(['role_name' => $data['role_name'], 'role_right' => bindec($rightStr)]);
+                RoleModel::where('id', $data['role_id'])
+                    ->update(['role_name' => $data['role_name'], 'role_right' => $rightTools->getRightValue($data)]);
+
+                $act['action_type'] = $actionList['role']['edit'];
+                $act['action_detail'] = '编辑角色';
+                $act['target_id'] = $data['role_id'];
             } else {
-                DB::table('t_role')->insert([
-                    'role_name' => $data['role_name'],
-                    'role_right' => bindec($rightStr),
-                ]);
+                $item = new RoleModel();
+
+                $item->role_name = $data['role_name'];
+                $item->role_right = $rightTools->getRightValue($data);
+
+                $item->save();
+
+                $act['action_type'] = $actionList['role']['create'];
+                $act['action_detail'] = '新建角色';
+                $act['target_id'] = $item->id;
             }
 
-            return redirect()->route('admin_role_list');
+            $rst['code'] = 100;
+            LogAction::dispatch($act)->onQueue($queueName);
+
+            return json_encode($rst);
         } else if ($request->isMethod('DELETE')) {
-            DB::table('t_role')->where('id', $id)->delete();
+            RoleModel::destroy($id);
+
+            $act['user_id'] = $nowUserId;
+            $act['action_type'] = $actionList['role']['delete'];
+            $act['act_time'] = date('Y-m-d H:i:s');
+            $act['is_admin'] = 1;
+            $act['action_detail'] = '删除角色';
+            $act['target_id'] = $id;
+
+            LogAction::dispatch($act)->onQueue($queueName);
 
             $rst['code'] = 100;
         }
 
         return json_encode($rst);
-    }
-
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
     }
 }

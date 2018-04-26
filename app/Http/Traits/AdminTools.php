@@ -10,5 +10,18 @@ namespace App\Http\Traits;
 
 trait AdminTools
 {
+    public function getNowUser()
+    {
+        return 1;
+    }
 
+    public $pageSize = 10;
+
+    public $pageTitle = '';
+    public $pageSubTitle = '';
+    public $pageModuleName = '';
+    public $pageModuleUrl = '';
+    public $pageFuncName = '';
+
+    public $moduleKey;
 }

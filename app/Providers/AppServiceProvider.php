@@ -21,11 +21,13 @@ class AppServiceProvider extends ServiceProvider
             // return true / false;
             return true;
         });
+        /*
         Queue::after(function (JobProcessed $event) {
             echo $event->connectionName . '<br />';
             echo $event->job->getName() . '<br />';
             echo '事件执行完了!<br />';
         });
+        */
     }
 
     /**

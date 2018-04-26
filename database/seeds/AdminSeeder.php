@@ -14,12 +14,7 @@ class AdminSeeder extends Seeder
         // 系统管理员
         $funcList = Config::get('constants.MODULE_LIST');
 
-        $idx = 0;
-        $total = '';
-        foreach ($funcList as $loop) {
-            $total = $total . '1';
-            $idx++;
-        }
+        $total = str_pad('', count($funcList), '0', STR_PAD_LEFT);
 
         DB::table('t_role')->insert([
             'id' => 1,

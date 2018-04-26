@@ -18,11 +18,12 @@ Route::prefix('admin')->group(function () {
 
     Route::get('user_edit/{id}', 'Admin\UserController@edit')->where('id', '[0-9]+');
 
-    Route::get('managers', 'Admin\AdminController@index')->name('admin_user_list');
-    Route::match(['get', 'post', 'delete'], 'admin/{id}', 'Admin\AdminController@showadmin')->where('id', '[0-9]+');
+    Route::match(['get', 'post'], 'managers', 'Admin\AdminController@index')->name('admin_user_list');
+
+    Route::match(['get', 'post', 'delete'], 'admin/{id}', 'Admin\AdminController@adminfunc')->where('id', '[0-9]+');
 
     Route::get('roles', 'Admin\AdminController@role')->name('admin_role_list');
-    Route::match(['get', 'post', 'delete'], 'role/{id}', 'Admin\AdminController@showrole')->where('id', '[0-9]+');
+    Route::match(['get', 'post', 'delete'], 'role/{id}', 'Admin\AdminController@rolefunc')->where('id', '[0-9]+');
 
     Route::get('products', 'Admin\ProductController@index')->name('admin_product_list');
     Route::get('orders', 'Admin\OrderController@index')->name('admin_order_list');

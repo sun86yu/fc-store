@@ -2,15 +2,139 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Admin\GeoModel;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Traits\AdminTools;
+use App\Jobs\LogAction;
+use App\Models\Admin\RoleModel;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Request as RequestFacade;
 
 class GeoController extends Controller
 {
+    use AdminTools;
+
+    public function __construct()
+    {
+        $this->moduleKey = 'geo';
+    }
+
     //
-    public function index()
+    public function index(Request $request)
     {
         $geoActive = true;
-        return view('Admin/Geo/geos', compact('geoActive'));
+
+        $this->pageTitle = '系统地区列表';
+        $this->pageSubTitle = '管理系统地区信息';
+        $this->pageModuleName = '地区管理';
+        $this->pageModuleUrl = route('admin_geo_list');
+        $this->pageFuncName = '地区列表';
+
+        $where = [];
+        if ($request->isMethod('POST')) {
+            $data = $request->post();
+
+            if ($data['top_geo'] != -1) {
+                $where[] = ['id', 'like', $data['top_geo'] . '%'];
+            }
+
+            if($data['geo_level'] != -1){
+                $where[] = ['geo_level', $data['geo_level']];
+            }
+        }
+
+        $lists = GeoModel::where($where)->paginate($this->pageSize);
+        $topGeo = GeoModel::where('geo_level', 1)->get();
+
+        return view('Admin/Geo/geos', array_merge(compact('geoActive', 'lists', 'topGeo'), $this->getCommonParm()));
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit(Request $request, $id)
+    {
+        //
+        if ($request->isMethod('POST')) {
+            $data = $request->post();
+
+            $actionList = Config::get('constants.ACTION_LIST');
+
+            $geo = GeoModel::find($id);
+
+            $act['action_detail'] = '更新地区';
+            $act['action_type'] = $actionList[$this->moduleKey]['editGeo'];
+
+            $geo->geo_name = trim($data['geo_name']);
+            $geo->is_active = $data['is_active'];
+
+            $geo->save();
+
+            $nowUserId = $this->getNowUser();
+
+            $act['user_id'] = $nowUserId;
+            $act['act_time'] = date('Y-m-d H:i:s');
+            $act['is_admin'] = 1;
+
+            $act['target_id'] = $geo->id;
+
+            $queueName = Config::get('constants.LOG_QUEUE_NAME');
+            LogAction::dispatch($act)->onQueue($queueName);
+
+            $rst['code'] = 100;
+            return json_encode($rst);
+        }
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //
+        $article = GeoModel::find($id);
+
+        $rst['code'] = 100;
+        $rst['data'] = $article;
+
+        return json_encode($rst);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Request $request, $id)
+    {
+        //
+        if ($request->ajax() && $request->isMethod('DELETE')) {
+            GeoModel::where('id', $id)
+                ->update(['is_active' => 0]);
+
+            $actionList = Config::get('constants.ACTION_LIST');
+            $nowUserId = $this->getNowUser();
+
+            $act['user_id'] = $nowUserId;
+            $act['action_type'] = $actionList[$this->moduleKey]['deleteGeo'];
+            $act['act_time'] = date('Y-m-d H:i:s');
+            $act['is_admin'] = 1;
+            $act['action_detail'] = '删除地区';
+            $act['target_id'] = $id;
+
+            $queueName = Config::get('constants.LOG_QUEUE_NAME');
+            LogAction::dispatch($act)->onQueue($queueName);
+
+            $rst['code'] = 100;
+            return json_encode($rst);
+        }
     }
 }

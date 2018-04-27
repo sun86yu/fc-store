@@ -31,7 +31,10 @@ Route::prefix('admin')->group(function () {
     Route::get('catmodule', 'Admin\CategoryController@module')->name('admin_category_module');
     Route::get('catconst', 'Admin\CategoryController@consts')->name('admin_category_const');
 
-    Route::get('geos', 'Admin\GeoController@index')->name('admin_geo_list');
+    Route::match(['get', 'post'], 'geos', 'Admin\GeoController@index')->name('admin_geo_list');
+    Route::get('geoinfo/{id}', 'Admin\GeoController@show')->where('id', '[0-9]+');
+    Route::match(['delete'], 'geodel/{id}', 'Admin\GeoController@destroy')->where('id', '[0-9]+');
+    Route::match(['post'], 'geoedit/{id}', 'Admin\GeoController@edit')->where('id', '[0-9]+');
 
     Route::match(['get', 'post'], 'articles', 'Admin\ArticleController@index')->name('admin_article_list');
     Route::match(['get', 'post'], 'articleadd', 'Admin\ArticleController@create')->name('admin_article_add');

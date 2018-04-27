@@ -19,7 +19,6 @@ Route::prefix('admin')->group(function () {
     Route::get('user_edit/{id}', 'Admin\UserController@edit')->where('id', '[0-9]+');
 
     Route::match(['get', 'post'], 'managers', 'Admin\AdminController@index')->name('admin_user_list');
-
     Route::match(['get', 'post', 'delete'], 'admin/{id}', 'Admin\AdminController@adminfunc')->where('id', '[0-9]+');
 
     Route::get('roles', 'Admin\AdminController@role')->name('admin_role_list');
@@ -34,8 +33,12 @@ Route::prefix('admin')->group(function () {
 
     Route::get('geos', 'Admin\GeoController@index')->name('admin_geo_list');
 
-    Route::get('articles', 'Admin\ArticleController@index')->name('admin_article_list');
-    Route::get('articleadd', 'Admin\ArticleController@create')->name('admin_article_add');
+    Route::match(['get', 'post'], 'articles', 'Admin\ArticleController@index')->name('admin_article_list');
+    Route::match(['get', 'post'], 'articleadd', 'Admin\ArticleController@create')->name('admin_article_add');
+    Route::match(['get', 'post'], 'articleedit/{id}', 'Admin\ArticleController@edit')->where('id', '[0-9]+');
+    Route::match(['delete'], 'articledel/{id}', 'Admin\ArticleController@destroy')->where('id', '[0-9]+');
+    Route::match(['get', 'post'], 'articleupload', 'Admin\ArticleController@upload');
+
 
     Route::match(['get', 'post'], 'logs', 'Admin\LogController@index')->name('admin_logs_list');
 });

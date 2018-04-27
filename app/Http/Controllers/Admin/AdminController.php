@@ -30,11 +30,11 @@ class AdminController extends Controller
     public function index(Request $request)
     {
         //
-        $pageTitle = $this->pageTitle = '管理员列表';
-        $subTitle = $this->pageSubTitle = '管理后台所有管理员';
-        $moduleName = $this->pageModuleName = '管理员';
-        $moduleUrl = $this->pageModuleUrl = route('admin_user_list');
-        $funcName = $this->pageFuncName = '管理员列表';
+        $this->pageTitle = '管理员列表';
+        $this->pageSubTitle = '管理后台所有管理员';
+        $this->pageModuleName = '管理员';
+        $this->pageModuleUrl = route('admin_user_list');
+        $this->pageFuncName = '管理员列表';
 
         $where = [];
         if ($request->isMethod('POST')) {
@@ -57,7 +57,7 @@ class AdminController extends Controller
         $moduleLists = Config::get('constants.MODULE_LIST');
 
 //        DB::connection()->enableQueryLog();
-        $lists = AdminModel::where($where)->with('role')->paginate($this->pageSize);
+        $lists = AdminModel::where($where)->with('role')->orderBy('create_time', 'desc')->paginate($this->pageSize);
 
 //        $log = DB::getQueryLog();
 //        print_r($log);
@@ -70,11 +70,11 @@ class AdminController extends Controller
     public function role()
     {
         //
-        $pageTitle = $this->pageTitle = '管理员角色列表';
-        $subTitle = $this->pageSubTitle = '管理后台所有管理员角色';
-        $moduleName = $this->pageModuleName = '管理员';
-        $moduleUrl = $this->pageModuleUrl = route('admin_user_list');
-        $funcName = $this->pageFuncName = '角色列表';
+        $this->pageTitle = '管理员角色列表';
+        $this->pageSubTitle = '管理后台所有管理员角色';
+        $this->pageModuleName = '管理员';
+        $this->pageModuleUrl = route('admin_user_list');
+        $this->pageFuncName = '角色列表';
 
         $lists = RoleModel::with('user')->paginate($this->pageSize);
 

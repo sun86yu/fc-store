@@ -43,6 +43,32 @@ module.exports = function () {
             .pipe(gulp.dest(path.join(dist_path, 'bootstrap/js/')));
     });
 
+    gulp.task('bower:bootstrap-datepicker-range', function () {
+        return gulp.src(path.join(bower_path, 'bootstrap-daterangepicker/daterangepicker.js'))
+            .pipe(uglify())
+            .pipe(rename({
+                suffix: '.min'
+            }))
+            .pipe(gulp.dest(path.join(dist_path, 'bootstrap-daterangepicker/')));
+    });
+    gulp.task('bower:bootstrap-datepicker-range-css', function () {
+        return gulp.src(path.join(bower_path, 'bootstrap-daterangepicker/daterangepicker.css'))
+            .pipe(cleanCss())
+            .pipe(rename({
+                suffix: '.min'
+            }))
+            .pipe(gulp.dest(path.join(dist_path, 'bootstrap-daterangepicker/')));
+    });
+
+    gulp.task('bower:moment', function () {
+        return gulp.src(path.join(bower_path, 'moment/moment.js'))
+            .pipe(uglify())
+            .pipe(rename({
+                suffix: '.min'
+            }))
+            .pipe(gulp.dest(path.join(dist_path, 'moment/')));
+    });
+
     gulp.task('bower:bootstrap-font', function () {
         return gulp.src(path.join(bower_path, 'bootstrap/dist/fonts/*'))
             .pipe(gulp.dest(path.join(dist_path, 'bootstrap/fonts/')));
@@ -91,6 +117,32 @@ module.exports = function () {
             .pipe(gulp.dest(path.join(dist_path, 'jquery-validation/')));
     });
 
+    gulp.task('bower:jquery-upload', function () {
+        return gulp.src(path.join(bower_path, 'blueimp-file-upload/js/{jquery.fileupload.js,vendor/jquery.ui.widget.js,' +
+            'jquery.iframe-transport.js,jquery.fileupload-ui.js,jquery.fileupload-process.js}'))
+            .pipe(uglify())
+            .pipe(rename({
+                suffix: '.min'
+            }))
+            .pipe(gulp.dest(path.join(dist_path, 'blueimp-file-upload/')));
+    });
+    gulp.task('bower:jquery-upload-tmp', function () {
+        return gulp.src(path.join(bower_path, 'blueimp-tmpl/js/tmpl.min.js'))
+            .pipe(gulp.dest(path.join(dist_path, 'blueimp-file-upload/')));
+    });
+    gulp.task('bower:jquery-upload-css', function () {
+        return gulp.src(path.join(bower_path, 'blueimp-file-upload/css/*'))
+            .pipe(cleanCss())
+            .pipe(rename({
+                suffix: '.min'
+            }))
+            .pipe(gulp.dest(path.join(dist_path, 'blueimp-file-upload/css/')));
+    });
+    gulp.task('bower:jquery-upload-img', function () {
+        return gulp.src(path.join(bower_path, 'blueimp-file-upload/img/*'))
+            .pipe(gulp.dest(path.join(dist_path, 'blueimp-file-upload/img/')));
+    });
+
     gulp.task('bower:clean', function () {
         return gulp.src(dist_path)
             .pipe(clean());
@@ -103,6 +155,8 @@ module.exports = function () {
         'bower:bootstrap-css',
         'bower:bootstrap-js',
         'bower:bootstrap-font',
+        'bower:bootstrap-datepicker-range',
+        'bower:bootstrap-datepicker-range-css',
         'bower:iconicons-css',
         'bower:iconicons-font',
         'bower:fastclick',
@@ -110,6 +164,11 @@ module.exports = function () {
         'bower:summernote',
         'bower:datatables',
         'bower:jq-validate',
+        'bower:jquery-upload',
+        'bower:jquery-upload-tmp',
+        'bower:jquery-upload-css',
+        'bower:jquery-upload-img',
+        'bower:moment',
     ]))
 };
 

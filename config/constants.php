@@ -17,6 +17,32 @@ return [
             'editRole' => 22,
             'deleteRole' => 23,
         ],
+        'article' => [
+            'createArticle' => 31,
+            'editArticle' => 32,
+            'deleteArticle' => 33,
+        ],
+        'user' => [
+            'member' => 41,
+        ],
+        'product' => [
+            'createProduct' => 51,
+            'editProduct' => 52,
+            'deleteProduct' => 53,
+        ],
+        'category' => [
+            'createCategory' => 61,
+            'editCategory' => 62,
+            'deleteCategory' => 63,
+        ],
+        'geo' => [
+            'createGeo' => 71,
+            'editGeo' => 72,
+            'deleteGeo' => 73,
+        ],
+        'log' => [
+            'systemlog' => 81,
+        ],
     ],
     'LOG_QUEUE_NAME' => 'sys_logs',
 ];

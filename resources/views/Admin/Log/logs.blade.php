@@ -27,7 +27,7 @@
     <section class="content">
         <div class="row">
             <div class="col-md-12">
-                <div class="box">
+                <div class="box box-primary">
                     <div class="box-header clearfix dataTables_wrapper form-inline dt-bootstrap">
                         <div class="col-sm-12">
                             <form method="post" action="/admin/logs">
@@ -51,7 +51,19 @@
                                         </select>
                                     </label>
                                     &nbsp;&nbsp;
-                                    <label>用户ID: <input type="search" name="search_user_id" class="form-control input-sm" value="{{ Request::get('search_user_id')  }}" ></label>
+                                    <div class="form-group">
+                                        <label>时间:</label>
+
+                                        <div class="input-group">
+                                            <div class="input-group-addon">
+                                                <i class="fa fa-calendar"></i>
+                                            </div>
+                                            <input type="text" value="{{ Request::get('search_time_range') }}" name="search_time_range" style="width:170px" class="form-control pull-right" id="search_time_range">
+                                        </div>
+                                        <!-- /.input group -->
+                                    </div>
+                                    &nbsp;&nbsp;
+                                    <label>用户ID: <input type="search" name="search_user_id" class="form-control input-sm" value="{{ Request::get('search_user_id') }}" ></label>
                                     <button type="submit" class="btn btn-default input-sm">查询</button>
                                 </div>
                             </form>
@@ -118,4 +130,26 @@
         </div>
 
     </section>
+    <link rel="stylesheet" href="{{ URL::asset('/components/bootstrap-daterangepicker/daterangepicker.min.css') }}">
+
+    <script type="text/javascript"
+            src="{{ URL::asset('/components/moment/moment.min.js') }}"></script>
+
+    <script type="text/javascript"
+            src="{{ URL::asset('/components/bootstrap-daterangepicker/daterangepicker.min.js') }}"></script>
+
+    <script>
+        $(function () {
+            $('#search_time_range').daterangepicker({
+                "locale": {
+                    format: 'YYYY-MM-DD',
+                    applyLabel: "确定",
+                    cancelLabel: "取消",
+                    resetLabel: "重置",
+                },
+                startDate: "2018-04-22",
+                endDate: "2018-04-27",
+            })
+        });
+    </script>
 @endsection

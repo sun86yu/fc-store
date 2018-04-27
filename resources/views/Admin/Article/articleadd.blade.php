@@ -1,164 +1,106 @@
 @extends('Admin.layout.admin')
 
 @section('content')
-    <section class="content-header">
-        <h1>
-            创建文章
-            <small>系统文章管理</small>
-        </h1>
-        <ol class="breadcrumb">
-            <li><a href="#"><i class="fa fa-dashboard"></i> 控制台</a></li>
-            <li><a href="#">文章</a></li>
-            <li class="active">创建文章</li>
-        </ol>
-    </section>
+    @component('Admin.layout.navigator')
+        @slot('title')
+            {{ $pageTitle  }}
+        @endslot
+
+        @slot('subTitle')
+            {{ $subTitle  }}
+        @endslot
+
+        @slot('moduleName')
+            {{ $moduleName  }}
+        @endslot
+
+        @slot('moduleUrl')
+            {{ $moduleUrl  }}
+        @endslot
+
+        @slot('funcName')
+            {{ $funcName  }}
+        @endslot
+
+    @endcomponent
+
     <section class="content">
         <div class="row">
             <div class="col-md-12">
-                <div class="box box-warning">
-                    <div class="box-header with-border">
-                        <h3 class="box-title">General Elements</h3>
-                    </div>
+                <div class="box box-primary">
                     <!-- /.box-header -->
                     <div class="box-body">
-                        <form role="form">
+                        <form id="articleForm" role="form" enctype="multipart/form-data" method="post"
+                              action="/admin/articleadd">
+                            <input type="hidden" name="_token" value="{{csrf_token()}}"/>
                             <!-- text input -->
                             <div class="form-group">
-                                <label>Text</label>
-                                <input type="text" class="form-control" placeholder="Enter ...">
-                            </div>
-                            <div class="form-group">
-                                <label>Text Disabled</label>
-                                <input type="text" class="form-control" placeholder="Enter ..." disabled>
+                                <label>标题</label>
+                                <input type="text" value="@if(isset($article)) {{ $article->title }} @endif" name="article_title" class="form-control" placeholder="请输入标题">
                             </div>
 
-                            <!-- textarea -->
                             <div class="form-group">
-                                <label>Textarea</label>
-                                <textarea class="form-control" rows="3" placeholder="Enter ..."></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label>Textarea Disabled</label>
-                                <textarea class="form-control" rows="3" placeholder="Enter ..." disabled></textarea>
+                                <label>图片</label>
                             </div>
 
-                            <!-- input states -->
-                            <div class="form-group has-success">
-                                <label class="control-label" for="inputSuccess"><i class="fa fa-check"></i> Input with success</label>
-                                <input type="text" class="form-control" id="inputSuccess" placeholder="Enter ...">
-                                <span class="help-block">Help block with success</span>
+                            <div class="container" style="width:99%">
+                                <span class="btn btn-success fileinput-button">
+                                    <i class="glyphicon glyphicon-plus"></i>
+                                    <span>选择文件...</span>
+                                    <input id="fileupload" type="file" name="files[]" multiple>
+                                </span>
+                                <br>
+                                <br>
+                                <div id="progress" class="progress">
+                                    <div class="progress-bar progress-bar-success"></div>
+                                </div>
+                                <br>
+                                <div id="imagesView">
+                                    @if(isset($article)) <img src="{{ $article->head_img }}" height="200px"/> @endif
+                                </div>
+                                <input type="hidden" name="article_id" value="@if(isset($article)) {{ $article->id }} @endif" />
+                                <input type="hidden" value="@if(isset($article)) {{ $article->head_img }} @endif" name="article_img" id="article_img"/>
                             </div>
-                            <div class="form-group has-warning">
-                                <label class="control-label" for="inputWarning"><i class="fa fa-bell-o"></i> Input with
-                                    warning</label>
-                                <input type="text" class="form-control" id="inputWarning" placeholder="Enter ...">
-                                <span class="help-block">Help block with warning</span>
-                            </div>
-                            <div class="form-group has-error">
-                                <label class="control-label" for="inputError"><i class="fa fa-times-circle-o"></i> Input with
-                                    error</label>
-                                <input type="text" class="form-control" id="inputError" placeholder="Enter ...">
-                                <span class="help-block">Help block with error</span>
-                            </div>
+
 
                             <!-- checkbox -->
                             <div class="form-group">
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox">
-                                        Checkbox 1
+                                        <input @if(isset($article) && $article->is_galarry == 1) checked @endif type="checkbox" name="is_galarry">
+                                        是否是幻灯
                                     </label>
                                 </div>
 
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox">
-                                        Checkbox 2
+                                        <input @if(isset($article) && $article->is_link == 1) checked @endif type="checkbox" name="is_link">
+                                        是否是外链
                                     </label>
                                 </div>
 
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" disabled>
-                                        Checkbox disabled
-                                    </label>
-                                </div>
                             </div>
 
-                            <!-- radio -->
                             <div class="form-group">
-                                <div class="radio">
-                                    <label>
-                                        <input type="radio" name="optionsRadios" id="optionsRadios1" value="option1" checked>
-                                        Option one is this and that&mdash;be sure to include why it's great
-                                    </label>
-                                </div>
-                                <div class="radio">
-                                    <label>
-                                        <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2">
-                                        Option two can be something else and selecting it will deselect option one
-                                    </label>
-                                </div>
-                                <div class="radio">
-                                    <label>
-                                        <input type="radio" name="optionsRadios" id="optionsRadios3" value="option3" disabled>
-                                        Option three is disabled
-                                    </label>
-                                </div>
+                                <label>外链</label>
+                                <input value="@if(isset($article)) {{ $article->link_url }} @endif" type="text" name="link_url" class="form-control" placeholder="如果是外链,请输入">
                             </div>
 
                             <!-- select -->
                             <div class="form-group">
-                                <label>Select</label>
-                                <select class="form-control">
-                                    <option>option 1</option>
-                                    <option>option 2</option>
-                                    <option>option 3</option>
-                                    <option>option 4</option>
-                                    <option>option 5</option>
+                                <label>状态</label>
+                                <select class="form-control" name="article_status">
+                                    <option value="1" @if(isset($article) && $article->status == 1) selected @endif>显示</option>
+                                    <option value="0" @if(isset($article) && $article->status == 0) selected @endif>隐藏</option>
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <label>Select Disabled</label>
-                                <select class="form-control" disabled>
-                                    <option>option 1</option>
-                                    <option>option 2</option>
-                                    <option>option 3</option>
-                                    <option>option 4</option>
-                                    <option>option 5</option>
-                                </select>
+                            <input type="hidden" name="article_content" id="article_content" value="@if(isset($article)) {{ $article->content }} @endif" />
+                            <div class="box-body pad">
+                                <div id="summernote"></div>
                             </div>
-
-                            <!-- Select multiple-->
-                            <div class="form-group">
-                                <label>Select Multiple</label>
-                                <select multiple class="form-control">
-                                    <option>option 1</option>
-                                    <option>option 2</option>
-                                    <option>option 3</option>
-                                    <option>option 4</option>
-                                    <option>option 5</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Select Multiple Disabled</label>
-                                <select multiple class="form-control" disabled>
-                                    <option>option 1</option>
-                                    <option>option 2</option>
-                                    <option>option 3</option>
-                                    <option>option 4</option>
-                                    <option>option 5</option>
-                                </select>
-                            </div>
-
+                            <button type="button" onclick="submitArticle()" class="btn bg-purple btn-block margin">保存
+                            </button>
                         </form>
-                    </div>
-                    <!-- /.box-body -->
-                </div>
-
-                <div class="box">
-                    <div class="box-body pad">
-                        <div id="summernote">Hello Summernote</div>
                     </div>
                 </div>
             </div>
@@ -168,11 +110,81 @@
     <link rel="stylesheet" href="{{ URL::asset('/components/summernote/summernote.css') }}">
     <script type="text/javascript" src="{{ URL::asset('/components/summernote/summernote.js') }}"></script>
 
+    <link rel="stylesheet" href="{{ URL::asset('/components/blueimp-file-upload/css/jquery.fileupload.min.css') }}">
+    <link rel="stylesheet" href="{{ URL::asset('/components/blueimp-file-upload/css/jquery.fileupload-ui.min.css') }}">
+
+    <script type="text/javascript"
+            src="{{ URL::asset('/components/blueimp-file-upload/vendor/jquery.ui.widget.min.js') }}"></script>
+    <script type="text/javascript"
+            src="{{ URL::asset('/components/blueimp-file-upload/jquery.iframe-transport.min.js') }}"></script>
+    <script type="text/javascript"
+            src="{{ URL::asset('/components/blueimp-file-upload/jquery.fileupload.min.js') }}"></script>
+
     <script>
-        $(document).ready(function() {
+        function submitArticle() {
+            var markupStr = $('#summernote').summernote('code');
+            $("#article_content").val(markupStr);
+            $("#articleForm").submit();
+        }
+
+        $(function () {
+            'use strict';
+            $('#fileupload').fileupload({
+                url: '/admin/articleupload',
+                dataType: 'json',
+                done: function (e, data) {
+                    $.each(data.result.files, function (index, file) {
+                        $("#imagesView").html('');
+                        $('<img src="' + file.name + '" style="height:200px" />').appendTo('#imagesView');
+                        $("#article_img").val(file.name);
+                    });
+                    // $("#progress").hide();
+                },
+                progressall: function (e, data) {
+                    var progress = parseInt(data.loaded / data.total * 100, 10);
+                    $('#progress .progress-bar').css(
+                        'width',
+                        progress + '%'
+                    );
+                }
+            }).prop('disabled', !$.support.fileInput)
+                .parent().addClass($.support.fileInput ? undefined : 'disabled');
+        });
+
+        $(document).ready(function () {
+
+            @if(isset($article))
+                var innerhtml = $("#article_content").val();
+                $(innerhtml).appendTo('#summernote');
+            @endif
+
             $('#summernote').summernote({
                 height: 400,
+                callbacks: {
+                    onImageUpload: function (files, editor, welEditable) {
+                        sendFile(files[0], editor, welEditable);
+                    }
+                },
             });
         });
+
+        function sendFile(file, editor, welEditable) {
+            data = new FormData();
+            data.append("files", file);
+            $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('input[name="_token"]').val()}});
+            $.ajax({
+                data: data,
+                type: "POST",
+                url: "/admin/articleupload",
+                cache: false,
+                contentType: false,
+                dataType: 'json',
+                processData: false,
+                success: function (data) {
+                    $('#summernote').summernote('editor.insertImage', data.files[0].name);
+                }
+            });
+        }
+
     </script>
 @endsection

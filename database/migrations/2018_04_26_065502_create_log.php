@@ -22,7 +22,7 @@ class CreateLog extends Migration
             $table->unsignedTinyInteger('is_admin');
             $table->string('action_detail', 200);
             $table->unsignedInteger('target_id');
-            $table->index(['is_admin', 'user_id', 'act_time', 'action_type']);
+            $table->index(['is_admin', 'action_type', 'act_time']);
         });
     }
 

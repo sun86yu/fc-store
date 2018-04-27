@@ -27,7 +27,7 @@
     <section class="content">
         <div class="row">
             <div class="col-md-12">
-                <div class="box">
+                <div class="box box-primary">
                     <div class="box-header with-border">
                         <button type="button" class="btn btn-success" data-toggle="modal" onclick="clearFrom()"
                                 data-target="#modal-edit">+ 添加管理员

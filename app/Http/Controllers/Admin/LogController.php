@@ -17,11 +17,11 @@ class LogController extends Controller
     //
     public function index(Request $request)
     {
-        $pageTitle = $this->pageTitle = '日志列表';
-        $subTitle = $this->pageSubTitle = '系统内所有日志查询';
-        $moduleName = $this->pageModuleName = '日志列表';
-        $moduleUrl = $this->pageModuleUrl = route('admin_logs_list');
-        $funcName = $this->pageFuncName = '日志查询';
+        $this->pageTitle = '日志列表';
+        $this->pageSubTitle = '系统内所有日志查询';
+        $this->pageModuleName = '日志列表';
+        $this->pageModuleUrl = route('admin_logs_list');
+        $this->pageFuncName = '日志查询';
 
         $moduleLists = Config::get('constants.MODULE_LIST');
         $actionList = Config::get('constants.ACTION_LIST');
@@ -30,11 +30,29 @@ class LogController extends Controller
 
         $where = [];
         $whereIn = [];
+        $where['is_admin'] = 1;
+
+        $startDate = date('Y-m-d 00:00:00', strtotime('-6 days'));
+        $endDate = date('Y-m-d 23:59:59');
+
         if ($request->isMethod('POST')) {
             $data = $request->post();
 
             if (RequestFacade::has('search_is_admin')) {
                 $where['is_admin'] = $data['search_is_admin'];
+            }
+
+            if (RequestFacade::has('search_time_range')) {
+                $dateRange = $data['search_time_range'];
+
+                $dateList = explode('-', $dateRange);
+                if (count($dateList) == 2) {
+                    $startDate = trim($dateList[0]);
+                    $endDate = trim($dateList[1]);
+
+                    $startDate = date('Y-m-d 00:00:00', strtotime($startDate));
+                    $endDate = date('Y-m-d 23:59:59', strtotime($endDate));
+                }
             }
 
             if (RequestFacade::has('search_user_id') && $data['search_user_id'] > 0) {
@@ -53,24 +71,26 @@ class LogController extends Controller
             }
         }
 
-        DB::connection()->enableQueryLog();
+//        DB::connection()->enableQueryLog();
 
         if (array_key_exists('is_admin', $where) && $where['is_admin'] == 1) {
             if (count($whereIn) > 0) {
-                $lists = LogModel::where($where)->whereIn('action_type', $whereIn)->with('admin')->paginate($this->pageSize);
+                $lists = LogModel::where($where)->whereIn('action_type', $whereIn)->whereBetween('act_time', [$startDate, $endDate])->orderBy('act_time', 'desc')->with('admin')->paginate($this->pageSize);
             } else {
-                $lists = LogModel::where($where)->with('admin')->paginate($this->pageSize);
+                $lists = LogModel::where($where)->whereBetween('act_time', [$startDate, $endDate])->orderBy('act_time', 'desc')->with('admin')->paginate($this->pageSize);
             }
         } else {
             if (count($whereIn) > 0) {
-                $lists = LogModel::where($where)->whereIn('action_type', $whereIn)->paginate($this->pageSize);
+                $lists = LogModel::where($where)->whereIn('action_type', $whereIn)->whereBetween('act_time', [$startDate, $endDate])->orderBy('act_time', 'desc')->paginate($this->pageSize);
             } else {
-                $lists = LogModel::where($where)->paginate($this->pageSize);
+                $lists = LogModel::where($where)->whereBetween('act_time', [$startDate, $endDate])->orderBy('act_time', 'desc')->paginate($this->pageSize);
             }
         }
 
-        $log = DB::getQueryLog();
+//        $log = DB::getQueryLog();
 //        print_r($log);
+//        print_r($whereIn);
+//        print_r($lists);
 
         return view('Admin/Log/logs', array_merge(compact('logActive', 'lists', 'moduleLists', 'actionList'), $this->getCommonParm()));
     }

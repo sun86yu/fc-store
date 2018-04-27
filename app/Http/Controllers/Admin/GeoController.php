@@ -99,10 +99,10 @@ class GeoController extends Controller
     public function show($id)
     {
         //
-        $article = GeoModel::find($id);
+        $geo = GeoModel::find($id);
 
         $rst['code'] = 100;
-        $rst['data'] = $article;
+        $rst['data'] = $geo;
 
         return json_encode($rst);
     }

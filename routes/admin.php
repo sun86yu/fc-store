@@ -27,9 +27,13 @@ Route::prefix('admin')->group(function () {
     Route::get('products', 'Admin\ProductController@index')->name('admin_product_list');
     Route::get('orders', 'Admin\OrderController@index')->name('admin_order_list');
 
-    Route::get('cats', 'Admin\CategoryController@index')->name('admin_category_list');
+    Route::match(['get', 'post'], 'cats', 'Admin\CategoryController@index')->name('admin_category_list');
     Route::get('catmodule', 'Admin\CategoryController@module')->name('admin_category_module');
     Route::get('catconst', 'Admin\CategoryController@consts')->name('admin_category_const');
+
+    Route::get('catinfo/{id}', 'Admin\CategoryController@showCat')->where('id', '[0-9]+');
+    Route::match(['post'], 'catedit/{id}', 'Admin\CategoryController@editCat')->where('id', '[0-9]+');
+    Route::match(['delete'], 'catdel/{id}', 'Admin\CategoryController@destroyCat')->where('id', '[0-9]+');
 
     Route::match(['get', 'post'], 'geos', 'Admin\GeoController@index')->name('admin_geo_list');
     Route::get('geoinfo/{id}', 'Admin\GeoController@show')->where('id', '[0-9]+');

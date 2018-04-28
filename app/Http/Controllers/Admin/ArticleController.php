@@ -8,7 +8,7 @@ use App\Models\Admin\NewsModel;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Request as RequestFacade;
+use Illuminate\Support\Facades\Validator;
 
 class ArticleController extends Controller
 {
@@ -36,23 +36,26 @@ class ArticleController extends Controller
         $this->pageFuncName = '文章查询';
 
         $where = [];
-        if ($request->isMethod('POST')) {
-            $data = $request->post();
 
-            if (RequestFacade::has('search_status') && $data['search_status'] != -1) {
-                $where['status'] = $data['search_status'];
-            }
-            if (RequestFacade::has('search_is_gallarry') && $data['search_is_gallarry'] == 'on') {
-                $where['is_galarry'] = 1;
-            }
-            if (RequestFacade::has('search_is_link') && $data['search_is_link'] == 'on') {
-                $where['is_link'] = 1;
-            }
+        if ($request->input('search_status', -1) != -1) {
+            $where['status'] = $request->input(['search_status']);
+        }
+        if ($request->input('search_is_gallarry') == 'on') {
+            $where['is_galarry'] = 1;
+        }
+        if ($request->input('search_is_link') == 'on') {
+            $where['is_link'] = 1;
         }
 
 //        DB::connection()->enableQueryLog();
 
         $lists = NewsModel::where($where)->orderBy('create_time', 'desc')->paginate($this->pageSize);
+
+        $lists = $lists->appends([
+            'search_status' => $request->input('search_status', -1),
+            'search_is_gallarry' => $request->input('search_is_gallarry'),
+            'search_is_link' => $request->input('search_is_link')
+        ]);
 
         return view('Admin/Article/articles', array_merge(compact('newsActive', 'lists'), $this->getCommonParm()));
     }
@@ -72,14 +75,33 @@ class ArticleController extends Controller
         $this->pageFuncName = '添加文章';
 
         if ($request->isMethod('POST')) {
-            $data = $request->post();
+            // 名称长度检测
+            $input = [
+                'article_title' => $request->input('article_title'),
+            ];
+            $rules = [
+                'article_title' => 'required|max:200',
+            ];
+            $messages = [
+                'required' => ':attribute 值必须填写.',
+                'max' => ':attribute 长度不能超过 :max.',
+            ];
+
+            $validator = Validator::make($input, $rules, $messages);
+
+            if ($validator->fails()) {
+                $newAddActive = true;
+                $error = $validator->errors()->first();
+
+                return view('Admin/Article/articleadd', array_merge(compact('newAddActive', 'error'), $this->getCommonParm()));
+            }
 
             $is_link = 0;
             $is_galarry = 0;
-            if (array_key_exists('is_link', $data) && strtolower(trim($data['is_link'])) == 'on') {
+            if (strtolower(trim($request->input('is_link'))) == 'on') {
                 $is_link = 1;
             }
-            if (array_key_exists('is_galarry', $data) && strtolower(trim($data['is_galarry'])) == 'on') {
+            if (strtolower(trim($request->input('is_galarry'))) == 'on') {
                 $is_galarry = 1;
             }
 
@@ -89,17 +111,17 @@ class ArticleController extends Controller
             $act['action_detail'] = '新建文章';
             $act['action_type'] = $actionList[$this->moduleKey]['createArticle'];
 
-            if ($data['article_id'] > 0) {
-                $article = NewsModel::find($data['article_id']);
+            if ($request->input('article_id') > 0) {
+                $article = NewsModel::find($request->input('article_id'));
                 $act['action_detail'] = '更新文章';
                 $act['action_type'] = $actionList[$this->moduleKey]['editArticle'];
             }
 
-            $article->title = trim($data['article_title']);
-            $article->content = $data['article_content'];
-            $article->status = $data['article_status'];
-            $article->link_url = $data['link_url'];
-            $article->head_img = $data['article_img'];
+            $article->title = trim($request->input('article_title'));
+            $article->content = $request->input('article_content');
+            $article->status = $request->input('article_status');
+            $article->link_url = $request->input('link_url');
+            $article->head_img = $request->input('article_img');
             $article->create_time = date('Y-m-d H:i:s');
 
             $article->is_link = $is_link;

@@ -30,8 +30,8 @@
                 <div class="box box-primary">
                     <div class="box-header clearfix dataTables_wrapper form-inline dt-bootstrap">
                         <div class="col-sm-12">
-                            <form method="post" action="/admin/logs">
-                                <input type="hidden" name="_token" value="{{csrf_token()}}"/>
+                            <input type="hidden" name="_token" value="{{csrf_token()}}"/>
+                            <form method="get" action="/admin/logs">
                                 <div class="dataTables_length">
                                     <label>
                                         状态:&nbsp;
@@ -147,8 +147,8 @@
                     cancelLabel: "取消",
                     resetLabel: "重置",
                 },
-                startDate: "2018-04-22",
-                endDate: "2018-04-27",
+                startDate: "{{ $searchStartDate  }}",
+                endDate: "{{ $searchEndDate  }}",
             })
         });
     </script>

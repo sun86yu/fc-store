@@ -35,8 +35,8 @@
                     </div>
                     <div class="box-header clearfix dataTables_wrapper form-inline dt-bootstrap">
                         <div class="col-sm-12">
-                            <form method="post" action="/admin/managers">
-                                <input type="hidden" name="_token" value="{{csrf_token()}}"/>
+                            <input type="hidden" name="_token" value="{{csrf_token()}}"/>
+                            <form method="get" action="/admin/managers">
                             <div class="dataTables_length">
                                 <label>
                                     状态:&nbsp;
@@ -164,12 +164,12 @@
                         <div class="form-group">
                             <label>管理员密码</label>
                             <input type="text" id="admin_pwd" name="admin_pwd" class="form-control"
-                                   placeholder="请输入新建帐号的密码">
+                                   placeholder="默认密码是{{ Config::get('constants.DEFAULT_PWD')  }}">
                         </div>
                         <div class="form-group">
                             <label>重复密码</label>
                             <input type="text" id="admin_pwd2" name="admin_pwd2" class="form-control"
-                                   placeholder="请再次输入新建帐号的密码">
+                                   placeholder="默认密码是{{ Config::get('constants.DEFAULT_PWD')  }}">
                         </div>
                         <div class="form-group">
                             <label>管理员邮箱</label>
@@ -221,14 +221,6 @@
                         required: true,
                         maxlength: 45
                     },
-                    admin_pwd: {
-                        required: true,
-                        maxlength: 45
-                    },
-                    admin_pwd2: {
-                        required: true,
-                        maxlength: 45
-                    },
                     admin_email: {
                         required: true,
                         email: true,
@@ -242,14 +234,6 @@
                     admin_name: {
                         required: "管理员帐号必须填写!",
                         maxlength: "角色名称不能超过 45 个字符"
-                    },
-                    admin_pwd: {
-                        required: "管理员密码必须填写!",
-                        maxlength: "帐号密码不能超过 45 个字符"
-                    },
-                    admin_pwd2: {
-                        required: "重复密码必须填写!",
-                        maxlength: "重复密码不能超过 45 个字符"
                     },
                     admin_email: {
                         required: "管理员邮箱必须填写!",
@@ -316,8 +300,6 @@
 
                             $("#admin_id").val(data.data.id);
                             $("#admin_name").val(data.data.admin_name);
-                            $("#admin_pwd").val(data.data.admin_pwd);
-                            $("#admin_pwd2").val(data.data.admin_pwd);
                             $("#admin_email").val(data.data.admin_email);
                             $("#nick_name").val(data.data.nick_name);
                             $("#status").val(data.data.status);

@@ -30,8 +30,8 @@
                 <div class="box box-primary">
                     <div class="box-header clearfix dataTables_wrapper form-inline dt-bootstrap">
                         <div class="col-sm-12">
-                            <form method="post" action="/admin/geos">
-                                <input type="hidden" name="_token" value="{{csrf_token()}}"/>
+                            <input type="hidden" name="_token" value="{{csrf_token()}}"/>
+                            <form method="get" action="/admin/geos">
                                 <div class="dataTables_length">
                                     <label>
                                         根地区:&nbsp;

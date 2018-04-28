@@ -20,6 +20,7 @@ class ShareDataProvider extends ServiceProvider
         View::share('userActive', false);
         View::share('identyActive', false);
         View::share('productActive', false);
+        View::share('productAddActive', false);
         View::share('orderActive', false);
         View::share('cateActive', false);
         View::share('moduleActive', false);

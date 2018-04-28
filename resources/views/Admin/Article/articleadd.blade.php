@@ -30,6 +30,13 @@
                 <div class="box box-primary">
                     <!-- /.box-header -->
                     <div class="box-body">
+                        @if(isset($error))
+                            <div id="errorBox" class="alert alert-warning alert-dismissible">
+                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                <h4><i class="icon fa fa-warning"></i> 操作失败!</h4>
+                                <p id="errorInfo">{{ $error  }}</p>
+                            </div>
+                        @endif
                         <form id="articleForm" role="form" enctype="multipart/form-data" method="post"
                               action="/admin/articleadd">
                             <input type="hidden" name="_token" value="{{csrf_token()}}"/>

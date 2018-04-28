@@ -7,9 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\AdminTools;
 use App\Jobs\LogAction;
-use App\Models\Admin\RoleModel;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Request as RequestFacade;
 
 class GeoController extends Controller
 {
@@ -32,20 +30,22 @@ class GeoController extends Controller
         $this->pageFuncName = '地区列表';
 
         $where = [];
-        if ($request->isMethod('POST')) {
-            $data = $request->post();
 
-            if ($data['top_geo'] != -1) {
-                $where[] = ['id', 'like', $data['top_geo'] . '%'];
-            }
+        if ($request->input('top_geo', -1) != -1) {
+            $where[] = ['id', 'like', $request->input('top_geo') . '%'];
+        }
 
-            if($data['geo_level'] != -1){
-                $where[] = ['geo_level', $data['geo_level']];
-            }
+        if ($request->input('geo_level', -1) != -1) {
+            $where[] = ['geo_level', $request->input('geo_level')];
         }
 
         $lists = GeoModel::where($where)->paginate($this->pageSize);
         $topGeo = GeoModel::where('geo_level', 1)->get();
+
+        $lists = $lists->appends([
+            'top_geo' => $request->input('top_geo'),
+            'geo_level' => $request->input('geo_level'),
+        ]);
 
         return view('Admin/Geo/geos', array_merge(compact('geoActive', 'lists', 'topGeo'), $this->getCommonParm()));
     }
@@ -60,7 +60,6 @@ class GeoController extends Controller
     {
         //
         if ($request->isMethod('POST')) {
-            $data = $request->post();
 
             $actionList = Config::get('constants.ACTION_LIST');
 
@@ -69,8 +68,8 @@ class GeoController extends Controller
             $act['action_detail'] = '更新地区';
             $act['action_type'] = $actionList[$this->moduleKey]['editGeo'];
 
-            $geo->geo_name = trim($data['geo_name']);
-            $geo->is_active = $data['is_active'];
+            $geo->geo_name = trim($request->input('geo_name'));
+            $geo->is_active = $request->input('is_active');
 
             $geo->save();
 

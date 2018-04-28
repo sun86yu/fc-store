@@ -25,6 +25,7 @@ Route::prefix('admin')->group(function () {
     Route::match(['get', 'post', 'delete'], 'role/{id}', 'Admin\AdminController@rolefunc')->where('id', '[0-9]+');
 
     Route::get('products', 'Admin\ProductController@index')->name('admin_product_list');
+    Route::match(['get', 'post'], 'productadd', 'Admin\ProductController@create')->name('admin_product_add');
     Route::get('orders', 'Admin\OrderController@index')->name('admin_order_list');
 
     Route::match(['get', 'post'], 'cats', 'Admin\CategoryController@index')->name('admin_category_list');

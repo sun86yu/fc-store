@@ -34,8 +34,8 @@
                     </div>
                     <div class="box-header clearfix dataTables_wrapper form-inline dt-bootstrap">
                         <div class="col-sm-12">
-                            <form method="post" action="/admin/articles">
-                                <input type="hidden" name="_token" value="{{csrf_token()}}"/>
+                            <input type="hidden" name="_token" value="{{csrf_token()}}"/>
+                            <form method="get" action="/admin/articles">
                                 <div class="dataTables_length">
                                     <label>
                                         状态:&nbsp;
@@ -78,7 +78,7 @@
                                 <tr>
                                     <td>{{ $item->id  }}</td>
                                     <td>{{ $item->title  }}</td>
-                                    <td><img src="{{ $item->head_img  }}" height="100px" />></td>
+                                    <td>@if($item->head_img != null)<img src="{{ $item->head_img  }}" height='100px' />>@endif</td>
                                     <td>
                                         @if($item->status == 1)
                                             <span class="label label-primary">显示</span>

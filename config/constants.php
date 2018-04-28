@@ -45,4 +45,5 @@ return [
         ],
     ],
     'LOG_QUEUE_NAME' => 'sys_logs',
+    'DEFAULT_PWD' => '123456',
 ];

@@ -35,8 +35,8 @@
                     </div>
                     <div class="box-header clearfix dataTables_wrapper form-inline dt-bootstrap">
                         <div class="col-sm-12">
-                            <form method="post" action="/admin/cats">
-                                <input type="hidden" name="_token" value="{{csrf_token()}}"/>
+                            <input type="hidden" name="_token" value="{{csrf_token()}}"/>
+                            <form method="get" action="/admin/cats">
                                 <div class="dataTables_length">
                                     <label>
                                         父分类:&nbsp;

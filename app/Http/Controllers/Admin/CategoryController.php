@@ -34,20 +34,21 @@ class CategoryController extends Controller
         $this->pageFuncName = '分类列表';
 
         $where = [];
-        if ($request->isMethod('POST')) {
-            $data = $request->post();
+        if ($request->input('search_top_cat', -1) != -1) {
+            $where[] = ['cat_parent', $request->input('search_top_cat')];
+        }
 
-            if ($data['search_top_cat'] != -1) {
-                $where[] = ['cat_parent', $data['search_top_cat']];
-            }
-
-            if ($data['search_cat_level'] != -1) {
-                $where[] = ['cat_level', $data['search_cat_level']];
-            }
+        if ($request->input('search_cat_level', -1) != -1) {
+            $where[] = ['cat_level', $request->input('search_cat_level')];
         }
 
         $lists = CategoryModel::where($where)->with('parent')->paginate($this->pageSize);
         $topCat = CategoryModel::where('cat_level', 1)->get();
+
+        $lists = $lists->appends([
+            'search_top_cat' => $request->input('search_top_cat'),
+            'cat_level' => $request->input('cat_level'),
+        ]);
 
         return view('Admin/Category/cats', array_merge(compact('cateActive', 'lists', 'topCat'), $this->getCommonParm()));
     }
@@ -62,7 +63,6 @@ class CategoryController extends Controller
     {
         //
         if ($request->isMethod('POST')) {
-            $data = $request->post();
 
             $actionList = Config::get('constants.ACTION_LIST');
 
@@ -76,15 +76,15 @@ class CategoryController extends Controller
                 $act['action_type'] = $actionList[$this->moduleKey]['editCategory'];
             }
 
-            $cat->cat_name = trim($data['cat_name']);
-            $cat->is_active = $data['is_active'];
+            $cat->cat_name = trim($request->input('cat_name'));
+            $cat->is_active = $request->input('is_active');
 
-            if (array_key_exists('cat_parent', $data)) {
-                $cat->cat_parent = $data['cat_parent'];
+            if ($request->has('cat_parent')) {
+                $cat->cat_parent = $request->input('cat_parent');
             } else {
                 $cat->cat_parent = 0;
             }
-            $cat->cat_level = $data['cat_level'];
+            $cat->cat_level = $request->input('cat_level');
 
             $cat->save();
 

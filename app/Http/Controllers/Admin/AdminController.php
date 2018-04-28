@@ -9,7 +9,6 @@ use App\Models\Admin\RoleModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use App\Services\RightTools;
-use Illuminate\Support\Facades\Request as RequestFacade;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 
@@ -37,23 +36,20 @@ class AdminController extends Controller
         $this->pageFuncName = '管理员列表';
 
         $where = [];
-        if ($request->isMethod('POST')) {
-            $data = $request->post();
 
-            if (RequestFacade::has('search_status') && $data['search_status'] != -1) {
-                $where['status'] = $data['search_status'];
-            }
+        if ($request->input('search_status', -1) != -1) {
+            $where['status'] = $request->input('search_status');
+        }
 
-            if (RequestFacade::has('search_role_id') && $data['search_role_id'] != -1) {
-                $where['role_id'] = $data['search_role_id'];
-            }
+        if ($request->input('search_role_id', -1) != -1) {
+            $where['role_id'] = $request->input('search_role_id');
+        }
 
-            if (RequestFacade::has('search_name') && trim($data['search_name']) != "") {
-                $where[] = ['nick_name', 'like', '%' . $data['search_name'] . '%'];
-            }
+        if ($request->input('search_name', "") != "") {
+            $where[] = ['nick_name', 'like', '%' . $request->input('search_name') . '%'];
+        }
 
 //            $request->flashOnly('search_status', 'search_role_id', 'search_name');
-        }
         $moduleLists = Config::get('constants.MODULE_LIST');
 
 //        DB::connection()->enableQueryLog();
@@ -62,6 +58,12 @@ class AdminController extends Controller
 //        $log = DB::getQueryLog();
 //        print_r($log);
         $roleList = RoleModel::all();
+
+        $lists = $lists->appends([
+            'search_status' => $request->input('search_status', -1),
+            'search_role_id' => $request->input('search_role_id', -1),
+            'search_name' => $request->input('search_name')
+        ]);
 
         $adminActive = true;
         return view('Admin/User/admins', array_merge(compact('adminActive', 'lists', 'moduleLists', 'roleList'), $this->getCommonParm()));
@@ -119,25 +121,15 @@ class AdminController extends Controller
 
             $rst['code'] = 100;
         } else if ($request->isMethod('POST')) {
-            $data = $request->post();
-
-            if ($data['admin_pwd'] != $data['admin_pwd2']) {
-                $rst['code'] = 0;
-                $rst['data']['error'] = '重复密码必须和密码相同!';
-
-                return json_encode($rst);
-            }
 
             // 名称长度检测
             $input = [
-                'admin_name' => $data['admin_name'],
-                'admin_pwd' => $data['admin_pwd'],
-                'admin_email' => $data['admin_email'],
-                'nick_name' => $data['nick_name'],
+                'admin_name' => $request->input('admin_name'),
+                'admin_email' => $request->input('admin_email'),
+                'nick_name' => $request->input('nick_name'),
             ];
             $rules = [
                 'admin_name' => 'required|max:45',
-                'admin_pwd' => 'required|max:45',
                 'admin_email' => 'required|max:200',
                 'nick_name' => 'required|max:45',
             ];
@@ -155,24 +147,37 @@ class AdminController extends Controller
                 return json_encode($rst);
             }
 
-            $input['status'] = $data['status'];
-            $input['role_id'] = $data['role_id'];
-            $input['admin_pwd'] = md5($data['role_id']);
+            $input['status'] = $request->input('status', 0);
+            $input['role_id'] = $request->input('role_id');
+
+            if (trim($request->input('admin_pwd', "")) != "") {
+                if ($request->input('admin_pwd') != $request->input('admin_pwd2')) {
+                    $rst['code'] = 0;
+                    $rst['data']['error'] = '重复密码必须和密码相同!';
+
+                    return json_encode($rst);
+                }
+
+                $input['admin_pwd'] = md5($request->input('admin_pwd'));
+            }
             $input['create_time'] = date('Y-m-d H:i:s');
 
             $act['user_id'] = $nowUserId;
             $act['act_time'] = date('Y-m-d H:i:s');
             $act['is_admin'] = 1;
 
-            if ($data['admin_id'] > 0) {
-                AdminModel::where('id', $data['admin_id'])
+            if ($request->input('admin_id', 0) > 0) {
+                AdminModel::where('id', $request->input('admin_id'))
                     ->update($input);
 
                 $act['action_type'] = $actionList[$this->moduleKey]['editUser'];
                 $act['action_detail'] = '编辑管理员信息';
-                $act['target_id'] = $data['admin_id'];
+                $act['target_id'] = $request->input('admin_id');
 
             } else {
+                if (!array_key_exists('admin_pwd', $input)) {
+                    $input['admin_pwd'] = md5(Config::get('constants.DEFAULT_PWD'));
+                }
                 $newAdmin = AdminModel::create($input);
 
                 $act['action_type'] = $actionList[$this->moduleKey]['createUser'];
@@ -213,11 +218,9 @@ class AdminController extends Controller
             $rst['data']['name'] = $role->role_name;
             $rst['data']['right'] = $rightTools->getRightList($role->role_right);
         } else if ($request->isMethod('POST')) {
-            $data = $request->post();
-
             // 名称长度检测
             $input = [
-                'role_name' => $data['role_name']
+                'role_name' => $request->input('role_name'),
             ];
             $rules = [
                 'role_name' => 'required|max:45',
@@ -241,18 +244,18 @@ class AdminController extends Controller
             $act['act_time'] = date('Y-m-d H:i:s');
             $act['is_admin'] = 1;
 
-            if ($data['role_id'] > 0) {
-                RoleModel::where('id', $data['role_id'])
-                    ->update(['role_name' => $data['role_name'], 'role_right' => $rightTools->getRightValue($data)]);
+            if ($request->input('role_id') > 0) {
+                RoleModel::where('id', $request->input('role_id'))
+                    ->update(['role_name' => $request->input('role_name'), 'role_right' => $rightTools->getRightValue($request->post())]);
 
                 $act['action_type'] = $actionList[$this->moduleKey]['editRole'];
                 $act['action_detail'] = '编辑角色';
-                $act['target_id'] = $data['role_id'];
+                $act['target_id'] = $request->input('role_id');
             } else {
                 $item = new RoleModel();
 
-                $item->role_name = $data['role_name'];
-                $item->role_right = $rightTools->getRightValue($data);
+                $item->role_name = $request->input('role_name');
+                $item->role_right = $rightTools->getRightValue($request->post());
 
                 $item->save();
 

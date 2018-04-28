@@ -7,8 +7,6 @@ use Illuminate\Http\Request;
 use App\Http\Traits\AdminTools;
 use Illuminate\Support\Facades\Config;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Request as RequestFacade;
 
 class LogController extends Controller
 {
@@ -35,37 +33,31 @@ class LogController extends Controller
         $startDate = date('Y-m-d 00:00:00', strtotime('-6 days'));
         $endDate = date('Y-m-d 23:59:59');
 
-        if ($request->isMethod('POST')) {
-            $data = $request->post();
+        $where['is_admin'] = $request->input('search_is_admin', 1);
 
-            if (RequestFacade::has('search_is_admin')) {
-                $where['is_admin'] = $data['search_is_admin'];
+        if ($request->has('search_time_range')) {
+            $dateRange = $request->input('search_time_range');
+
+            $dateList = explode(' - ', $dateRange);
+            if (count($dateList) == 2) {
+                $startDate = trim($dateList[0]);
+                $endDate = trim($dateList[1]);
+
+                $startDate = date('Y-m-d 00:00:00', strtotime($startDate));
+                $endDate = date('Y-m-d 23:59:59', strtotime($endDate));
             }
+        }
 
-            if (RequestFacade::has('search_time_range')) {
-                $dateRange = $data['search_time_range'];
+        if ($request->input('search_user_id', 0) > 0) {
+            $where['user_id'] = $request->input('search_user_id');
+        }
 
-                $dateList = explode('-', $dateRange);
-                if (count($dateList) == 2) {
-                    $startDate = trim($dateList[0]);
-                    $endDate = trim($dateList[1]);
+        if ($request->input('search_module_id', -1) != -1) {
 
-                    $startDate = date('Y-m-d 00:00:00', strtotime($startDate));
-                    $endDate = date('Y-m-d 23:59:59', strtotime($endDate));
-                }
-            }
-
-            if (RequestFacade::has('search_user_id') && $data['search_user_id'] > 0) {
-                $where['user_id'] = $data['search_user_id'];
-            }
-
-            if (RequestFacade::has('search_module_id') && $data['search_module_id'] != -1) {
-
-                foreach ($actionList as $loopModu => $loopAclist) {
-                    if ($loopModu == $data['search_module_id']) {
-                        foreach ($loopAclist as $loopKey => $loopVal) {
-                            array_push($whereIn, $loopVal);
-                        }
+            foreach ($actionList as $loopModu => $loopAclist) {
+                if ($loopModu == $request->input('search_module_id')) {
+                    foreach ($loopAclist as $loopKey => $loopVal) {
+                        array_push($whereIn, $loopVal);
                     }
                 }
             }
@@ -92,6 +84,16 @@ class LogController extends Controller
 //        print_r($whereIn);
 //        print_r($lists);
 
-        return view('Admin/Log/logs', array_merge(compact('logActive', 'lists', 'moduleLists', 'actionList'), $this->getCommonParm()));
+        $searchStartDate = date('Y-m-d', strtotime($startDate));
+        $searchEndDate = date('Y-m-d', strtotime($endDate));
+
+        $lists = $lists->appends([
+            'search_is_admin' => $request->input('search_is_admin', 1),
+            'search_user_id' => $request->input('search_user_id'),
+            'search_module_id' => $request->input('search_module_id', -1),
+            'search_time_range' => $request->input('search_time_range', $searchStartDate . ' - ' . $searchEndDate)
+        ]);
+
+        return view('Admin/Log/logs', array_merge(compact('logActive', 'lists', 'moduleLists', 'actionList', 'searchStartDate', 'searchEndDate'), $this->getCommonParm()));
     }
 }

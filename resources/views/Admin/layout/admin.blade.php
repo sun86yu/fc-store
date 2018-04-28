@@ -177,7 +177,7 @@
                         </li>
                     </ul>
                 </li>
-                <li class="treeview @if (($productActive === true) or($orderActive === true))  active menu-open @endif">
+                <li class="treeview @if (($productActive === true) or ($productAddActive === true) or($orderActive === true))  active menu-open @endif">
                     <a href="#">
                         <i class="fa fa-th"></i>
                         <span>商品</span>
@@ -186,6 +186,9 @@
                     <ul class="treeview-menu">
                         <li class="@if ($productActive === true) active @endif">
                             <a href="/admin/products"><i class="fa fa-shopping-cart"></i>商品列表</a>
+                        </li>
+                        <li class="@if ($productAddActive === true) active @endif">
+                            <a href="/admin/productadd"><i class="fa fa-cart-plus"></i>添加商品</a>
                         </li>
                         <li class="@if ($orderActive === true) active @endif">
                             <a href="/admin/orders"><i class="fa fa-list"></i>订单列表</a>

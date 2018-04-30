@@ -21,6 +21,7 @@ class CreateCatconst extends Migration
             $table->unsignedInteger('const_val')->default(0);
             $table->unsignedInteger('show_order')->default(1);
             $table->index(['mod_id', 'show_order']);
+            $table->unique(['mod_id', 'const_val']);
         });
     }
 

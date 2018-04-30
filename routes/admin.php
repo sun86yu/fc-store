@@ -33,8 +33,18 @@ Route::prefix('admin')->group(function () {
     Route::get('catconst', 'Admin\CategoryController@consts')->name('admin_category_const');
 
     Route::get('catinfo/{id}', 'Admin\CategoryController@showCat')->where('id', '[0-9]+');
+    Route::get('moduleinfo/{id}', 'Admin\CategoryController@showModule')->where('id', '[0-9]+');
+    Route::get('catsoninfo/{id}', 'Admin\CategoryController@showCatSon')->where('id', '[0-9]+');
+    Route::get('catmoduleinfo/{id}', 'Admin\CategoryController@showCatModule')->where('id', '[0-9]+');
+    Route::get('constinfo/{id}', 'Admin\CategoryController@showCatConst')->where('id', '[0-9]+');
+
     Route::match(['post'], 'catedit/{id}', 'Admin\CategoryController@editCat')->where('id', '[0-9]+');
+    Route::match(['post'], 'moduleedit/{id}', 'Admin\CategoryController@editModule')->where('id', '[0-9]+');
+    Route::match(['post'], 'constedit/{id}', 'Admin\CategoryController@editConst')->where('id', '[0-9]+');
+
     Route::match(['delete'], 'catdel/{id}', 'Admin\CategoryController@destroyCat')->where('id', '[0-9]+');
+    Route::match(['delete'], 'moduledel/{id}', 'Admin\CategoryController@destroyModule')->where('id', '[0-9]+');
+    Route::match(['delete'], 'constdel/{id}', 'Admin\CategoryController@destroyConst')->where('id', '[0-9]+');
 
     Route::match(['get', 'post'], 'geos', 'Admin\GeoController@index')->name('admin_geo_list');
     Route::get('geoinfo/{id}', 'Admin\GeoController@show')->where('id', '[0-9]+');

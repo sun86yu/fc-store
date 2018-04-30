@@ -34,6 +34,12 @@ return [
             'createCategory' => 61,
             'editCategory' => 62,
             'deleteCategory' => 63,
+            'createModule' => 64,
+            'editModule' => 65,
+            'deleteModule' => 66,
+            'createConst' => 67,
+            'editConst' => 68,
+            'deleteConst' => 69,
         ],
         'geo' => [
             'createGeo' => 71,
@@ -46,4 +52,12 @@ return [
     ],
     'LOG_QUEUE_NAME' => 'sys_logs',
     'DEFAULT_PWD' => '123456',
+    'CAT_MODULE_TYPE_LIST' => [
+        1 => '文本框',
+        2 => 'textarea',
+        3 => '下拉框',
+        4 => '单选框',
+        5 => '复选框',
+        6 => '时间选择框'
+    ],
 ];

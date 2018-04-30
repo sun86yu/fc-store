@@ -125,7 +125,7 @@
 
         @component('Admin.layout.alert')
             @slot('title')
-                测试
+                删除分类
             @endslot
 
             确定要删除该记录?

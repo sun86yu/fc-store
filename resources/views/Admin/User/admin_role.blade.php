@@ -91,7 +91,7 @@
 
         @component('Admin.layout.alert')
             @slot('title')
-                测试
+                删除角色
             @endslot
 
             确定要删除该记录?

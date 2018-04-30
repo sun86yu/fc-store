@@ -18,6 +18,6 @@ class CatModuleModel extends Model
 
     public function category()
     {
-        return $this->belongsTo('App\Models\Admin\CategoryModel', 'id', 'cat_id');
+        return $this->belongsTo('App\Models\Admin\CategoryModel', 'cat_id', 'id');
     }
 }

@@ -19,8 +19,8 @@ class CreateCatmodule extends Migration
             $table->unsignedInteger('cat_id')->default(0);
             $table->string('mod_name', 45);
             $table->unsignedTinyInteger('mod_type')->default(1);
-            $table->string('mod_dw', 45);
-            $table->string('default_value', 45);
+            $table->string('mod_dw', 45)->nullable();
+            $table->string('default_value', 45)->nullable();
             $table->string('mod_en_name', 45);
             $table->unsignedTinyInteger('is_number')->default(0);
             $table->unsignedTinyInteger('min_length')->default(1);
@@ -28,6 +28,7 @@ class CreateCatmodule extends Migration
             $table->unsignedTinyInteger('is_phone')->default(0);
             $table->unsignedTinyInteger('is_email')->default(0);
             $table->unsignedTinyInteger('is_date')->default(0);
+            $table->unsignedTinyInteger('is_active')->default(1);
             $table->index(['cat_id']);
         });
     }

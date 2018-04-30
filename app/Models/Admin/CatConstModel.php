@@ -13,6 +13,6 @@ class CatConstModel extends Model
 
     public function module()
     {
-        return $this->belongsTo('App\Models\Admin\CatModuleModel', 'id', 'mod_id');
+        return $this->belongsTo('App\Models\Admin\CatModuleModel', 'mod_id', 'id');
     }
 }

@@ -30,13 +30,13 @@
                 <div class="box box-primary">
                     <div class="box-header with-border">
                         <button type="button" class="btn btn-success" data-toggle="modal" onclick="clearFrom()"
-                                data-target="#modal-edit">+ 添加常量
+                                data-target="#modal-edit">+ 添加模块
                         </button>
                     </div>
                     <div class="box-header clearfix dataTables_wrapper form-inline dt-bootstrap">
                         <div class="col-sm-12">
                             <input type="hidden" name="_token" value="{{csrf_token()}}"/>
-                            <form method="get" action="/admin/catconst">
+                            <form method="get" action="/admin/catmodule">
                                 <div class="dataTables_length">
                                     <label>
                                         一级分类:&nbsp;
@@ -52,25 +52,8 @@
                                     &nbsp;&nbsp;&nbsp;&nbsp;
                                     <label>
                                         二级分类:&nbsp;
-                                        <select name="search_sec_cat" id="search_sec_cat" class="form-control input-sm"
-                                                onchange="setSearchCatModule()">
+                                        <select name="search_sec_cat" id="search_sec_cat" class="form-control input-sm">
                                             <option value="-1">全部</option>
-                                            @foreach($firstSecondCat as $loopSec)
-                                                <option value="{{ $loopSec->id  }}"
-                                                        @if ( Request::has('search_sec_cat') && Request::get('search_sec_cat') == $loopSec->id ) selected @endif>{{ $loopSec->cat_name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </label>
-
-                                    &nbsp;&nbsp;&nbsp;&nbsp;
-                                    <label>
-                                        模块:&nbsp;
-                                        <select class="form-control input-sm" name="search_cat_module" id="search_cat_module">
-                                            <option value="-1">全部</option>
-                                            @foreach($defaultCatModule as $loopModel)
-                                                <option value="{{ $loopModel->id  }}"
-                                                        @if ( Request::has('search_cat_module') && Request::get('search_cat_module') == $loopModel->id ) selected @endif>{{ $loopModel->mod_name }}</option>
-                                            @endforeach
                                         </select>
                                     </label>
                                     &nbsp;&nbsp;&nbsp;&nbsp;
@@ -84,19 +67,62 @@
                         <table class="table table-hover table-bordered">
                             <tr>
                                 <th style="width: 10px">#</th>
-                                <th>名称</th>
-                                <th>值</th>
                                 <th>模块</th>
-                                <th>权重</th>
+                                <th>表单名</th>
+                                <th>类型</th>
+                                <th>单位</th>
+                                <th>默认值</th>
+                                <th>数字</th>
+                                <th>电话</th>
+                                <th>邮箱</th>
+                                <th>日期</th>
+                                <th>分类</th>
                                 <th style="width: 120px">操作</th>
                             </tr>
                             @foreach ($lists as $item)
                                 <tr>
                                     <td>{{ $item->id }}</td>
-                                    <td>{{ $item->const_text }}</td>
-                                    <td>{{ $item->const_val }}</td>
-                                    <td>{{ $item->module->mod_name }}</td>
-                                    <td>{{ $item->show_order }}</td>
+                                    <td>{{ $item->mod_name }}</td>
+                                    <td>{{ $item->mod_en_name }}</td>
+                                    <td>
+                                        @foreach($moduleTypeList as $typeId => $typeName)
+
+                                            @if($item->mod_type == $typeId)
+                                                {{$typeName}}
+                                            @endif
+                                        @endforeach
+                                    </td>
+                                    <td>{{ $item->mod_dw }}</td>
+                                    <td>{{ $item->default_value }}</td>
+                                    <td>
+                                        @if($item->is_number == 1)
+                                            <span class="label label-primary">是</span>
+                                        @else
+                                            <span class="label label-danger">否</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($item->is_phone == 1)
+                                            <span class="label label-primary">是</span>
+                                        @else
+                                            <span class="label label-danger">否</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($item->is_email == 1)
+                                            <span class="label label-primary">是</span>
+                                        @else
+                                            <span class="label label-danger">否</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($item->is_date == 1)
+                                            <span class="label label-primary">是</span>
+                                        @else
+                                            <span class="label label-danger">否</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $item->category->cat_name }}</td>
                                     <td>
                                         <a href="javascript:editItem({{$item->id}})">
                                             <i class="fa fa-edit"></i> 编辑
@@ -121,14 +147,14 @@
                             </div>
                         </div>
                     </div>
-                    <input type="hidden" name="del_mod_id" id="del_mod_id" value="0"/>
+                    <input type="hidden" name="del_module_id" id="del_module_id" value="0"/>
                 </div>
             </div>
         </div>
 
         @component('Admin.layout.alert')
             @slot('title')
-                删除常量
+                删除模块
             @endslot
 
             确定要删除该记录?
@@ -136,14 +162,13 @@
 
         <div class="modal fade" id="modal-edit">
             <div class="modal-dialog">
-                <form id="editForm" role="form" method="post" action="/admin/constedit/0">
+                <form id="editForm" role="form" method="post" action="/admin/moduleedit/0">
                     <input type="hidden" name="_token" value="{{csrf_token()}}"/>
-                    <input type="hidden" name="mod_id" id="mod_id" value="0"/>
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title">编辑常量</h4>
+                            <h4 class="modal-title">编辑分类模块</h4>
                         </div>
                         <div class="modal-body">
                             <div id="errorBox" class="alert alert-warning alert-dismissible">
@@ -152,24 +177,71 @@
                             </div>
 
                             <!-- text input -->
-                            <div class="form-group col-xs-12">
-                                <label>常量文字</label>
-                                <input type="text" id="const_text" name="const_text" class="form-control"
-                                       placeholder="请输入常量文字">
+                            <div class="form-group col-xs-6">
+                                <label>模块名称</label>
+                                <input type="text" id="mod_name" name="mod_name" class="form-control"
+                                       placeholder="请输入模块名称">
+                            </div>
+                            <div class="form-group col-xs-6">
+                                <label>表单名称</label>
+                                <input type="text" id="mod_en_name" name="mod_en_name" class="form-control"
+                                       placeholder="请输入表单名称">
                             </div>
 
-                            <div class="form-group col-xs-12">
-                                <label>常量值</label>
-                                <input type="text" id="const_val" name="const_val" class="form-control"
-                                       placeholder="请输入常量值">
+                            <div class="form-group col-xs-4">
+                                <label>类型</label>
+                                <select class="form-control" name="mod_type" id="mod_type">
+                                    @foreach($moduleTypeList as $typeId => $loopType)
+                                        <option value="{{ $typeId  }}">{{ $loopType  }}</option>
+                                    @endforeach
+                                </select>
                             </div>
 
-                            <div class="form-group col-xs-12">
-                                <label>显示顺序</label>
-                                <input type="text" id="show_order" name="show_order" class="form-control"
-                                       placeholder="该值越大显示越靠前">
+                            <div class="form-group col-xs-4">
+                                <label>单位</label>
+                                <input type="text" id="mod_dw" name="mod_dw" class="form-control"
+                                       placeholder="请输入单位,如:元">
+
                             </div>
 
+                            <div class="form-group col-xs-4">
+                                <label>默认值</label>
+                                <input type="text" id="default_value" name="default_value" class="form-control"
+                                       placeholder="请输入默认值!">
+
+                            </div>
+
+                            <div class="form-group col-xs-6">
+                                <label>最小长度</label>
+                                <input type="text" id="min_length" name="min_length" class="form-control"
+                                       placeholder="模块内容的最小长度">
+                            </div>
+                            <div class="form-group col-xs-6">
+                                <label>最大长度</label>
+                                <input type="text" id="max_length" name="max_length" class="form-control"
+                                       placeholder="模块内容的最大长度">
+                            </div>
+                            <div class="form-group col-xs-12">
+                                <label>
+                                    <input type="checkbox" id="is_number" name="is_number"/>
+                                    是否是数字
+                                </label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <label>
+                                    <input type="checkbox" id="is_phone" name="is_phone"/>
+                                    是否是电话
+                                </label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <label>
+                                    <input type="checkbox" id="is_email" name="is_email"/>
+                                    是否是邮箱
+                                </label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <label>
+                                    <input type="checkbox" id="is_date" name="is_date"/>
+                                    是否是日期
+                                </label>
+                            </div>
                             <div class="form-group col-xs-6">
                                 <label>一级分类</label>
                                 <select class="form-control" name="top_cat" id="top_cat" onchange="setCatSon()">
@@ -180,23 +252,13 @@
                             </div>
                             <div class="form-group col-xs-6">
                                 <label>二级分类</label>
-                                <select class="form-control" name="sec_cat" id="sec_cat" onchange="setModuleList()">
+                                <select class="form-control" name="sec_cat" id="sec_cat">
                                     @foreach($firstSecondCat as $loopSec)
                                         <option value="{{ $loopSec->id  }}">{{ $loopSec->cat_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
-
-                            <div class="form-group col-xs-12">
-                                <label>模块</label>
-                                <select class="form-control" name="cat_module" id="cat_module">
-                                    @foreach($defaultCatModule as $loopModel)
-                                        <option value="{{ $loopModel->id  }}">{{ $loopModel->mod_name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <input type="hidden" name="const_id" id="const_id" value="0"/>
+                            <input type="hidden" name="module_id" id="module_id" value="0"/>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-default pull-left" data-dismiss="modal">关闭</button>
@@ -213,54 +275,25 @@
             src="{{ URL::asset('/components/jquery-validation/jquery.validate.min.js') }}"></script>
 
     <script>
-        function setSearchCatModule() {
-            var selectCat = $("#search_sec_cat").val();
+        function setSearchCatSon() {
+            var selectTopCat = $("#search_top_cat").val();
 
             $.ajax({
                 type: "GET",
-                url: "/admin/catmoduleinfo/" + selectCat,
+                url: "/admin/catsoninfo/" + selectTopCat,
                 dataType: 'json',
                 success: function (data) {
                     if (data.code == 100) {
                         var lists = data.data;
 
-                        $("#search_cat_module").empty();
-                        $("#search_cat_module").append("<option value=\"-1\">全部</option>");
+                        $("#search_sec_cat").empty();
+                        $("#search_sec_cat").append("<option value=\"-1\">全部</option>");
                         for (var i = 0; i < lists.length; i++) {
-                            $("#search_cat_module").append("<option value=\"" + lists[i].id + "\">" + lists[i].mod_name + "</option>");
+                            $("#search_sec_cat").append("<option value=\"" + lists[i].id + "\">" + lists[i].cat_name + "</option>");
                         }
                     }
                 }
             });
-        }
-
-        function setSearchCatSon() {
-            var selectTopCat = $("#search_top_cat").val();
-            if (selectTopCat == -1) {
-                $('#search_sec_cat').empty();
-                $('#search_cat_module').empty();
-
-                $("#search_sec_cat").append("<option value=\"-1\">全部</option>");
-                $("#search_cat_module").append("<option value=\"-1\">全部</option>");
-            } else {
-                $.ajax({
-                    type: "GET",
-                    url: "/admin/catsoninfo/" + selectTopCat,
-                    dataType: 'json',
-                    success: function (data) {
-                        if (data.code == 100) {
-                            var lists = data.data;
-
-                            $("#search_sec_cat").empty();
-                            $("#search_sec_cat").append("<option value=\"-1\">全部</option>");
-                            for (var i = 0; i < lists.length; i++) {
-                                $("#search_sec_cat").append("<option value=\"" + lists[i].id + "\">" + lists[i].cat_name + "</option>");
-                            }
-                        }
-                    }
-                });
-            }
-
         }
 
         function setCatSon() {
@@ -283,48 +316,42 @@
             });
         }
 
-        function setModuleList() {
-            var selectCat = $("#sec_cat").val();
-
-            $.ajax({
-                type: "GET",
-                url: "/admin/catmoduleinfo/" + selectCat,
-                dataType: 'json',
-                success: function (data) {
-                    if (data.code == 100) {
-                        var lists = data.data;
-
-                        $("#cat_module").empty();
-                        for (var i = 0; i < lists.length; i++) {
-                            $("#cat_module").append("<option value=\"" + lists[i].id + "\">" + lists[i].mod_name + "</option>");
-                        }
-                    }
-                }
-            });
-        }
-
         $(document).ready(function () {
             $("#editForm").validate({
                 rules: {
-                    const_text: {
+                    mod_name: {
                         required: true,
                         maxlength: 45
                     },
-                    const_val: {
+                    mod_en_name: {
                         required: true,
+                        maxlength: 45
+                    },
+                    min_length: {
                         digits: true,
-                        maxlength: 5
+                        maxlength: 8
+                    },
+                    max_length: {
+                        digits: true,
+                        maxlength: 8
                     },
                 },
                 messages: {
-                    const_text: {
-                        required: "常量文字必须填写!",
-                        maxlength: "常量文字不能超过 45 个字符"
+                    mod_name: {
+                        required: "模块名称必须填写!",
+                        maxlength: "模块名称不能超过 45 个字符"
                     },
-                    const_val: {
-                        required: "常量值必须填写!",
-                        digits: "常量值必须是数字!",
-                        maxlength: "常量值不能超过 5 个字符"
+                    mod_en_name: {
+                        required: "表单名称必须填写!",
+                        maxlength: "表单名称不能超过 45 个字符"
+                    },
+                    min_length: {
+                        digits: "最小长度值必须是数字!",
+                        maxlength: "最小长度不能超过 8 个字符"
+                    },
+                    max_length: {
+                        digits: "最大长度值必须是数字!",
+                        maxlength: "最大长度不能超过 8 个字符"
                     },
                 },
                 errorElement: "em",
@@ -342,21 +369,21 @@
         });
 
         function delItem(_id) {
-            $("#del_mod_id").val(_id);
+            $("#del_module_id").val(_id);
             $("#modal-alert").modal();
         }
 
         function submitForm() {
             if ($("#editForm").valid()) {
-                var _id = $("#mod_id").val();
+                var _id = $("#module_id").val();
                 $.ajax({
                     type: "POST",
-                    url: "/admin/constedit/" + _id,
+                    url: "/admin/moduleedit/" + _id,
                     data: $("#editForm").serialize(),
                     dataType: 'json',
                     success: function (data) {
                         if (data.code == 100) {
-                            window.location.href = "/admin/catconst";
+                            window.location.href = "/admin/catmodule";
                         } else {
                             $("#errorBox").show();
                             $("#errorInfo").html(data.data.error);
@@ -367,16 +394,16 @@
         }
 
         function confirmAlert() {
-            var _id = $("#del_mod_id").val();
+            var _id = $("#del_module_id").val();
             $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('input[name="_token"]').val()}});
 
             $.ajax({
                 type: "DELETE",
-                url: "/admin/constdel/" + _id,
+                url: "/admin/moduledel/" + _id,
                 dataType: 'json',
                 success: function (data) {
                     if (data.code == 100) {
-                        window.location.href = "/admin/catconst";
+                        window.location.href = "/admin/catmodule";
                     } else {
                         alert('操作失败!');
                     }
@@ -388,27 +415,54 @@
             $("#errorBox").hide();
             $("#errorInfo").html('');
 
-            $("#const_id").val(0);
-            $("#const_text").val('');
-            $("#const_val").val('');
-            $("#show_order").val('');
-            $("#editForm").attr("action", "/admin/constedit/" + 0);
+            $("#module_id").val(0);
+            $("#module_name").val('');
+            $("#mod_en_name").val('');
+            $("#mod_dw").val('');
+            $("#default_value").val('');
+            $("#min_length").val('');
+            $("#max_length").val('');
+
+            $("#editForm input[type='checkbox']").each(
+                function () {
+                    this.checked = false;
+                }
+            )
+
+            $("#editForm").attr("action", "/admin/moduleedit/" + 0);
         }
 
         function editItem(_id) {
             if (_id > 0) {
                 $.ajax({
                     type: "GET",
-                    url: "/admin/constinfo/" + _id,
+                    url: "/admin/moduleinfo/" + _id,
                     dataType: 'json',
                     success: function (data) {
                         if (data.code == 100) {
                             clearFrom();
 
-                            $("#const_id").val(data.data.id);
-                            $("#const_text").val(data.data.const_text);
-                            $("#const_val").val(data.data.const_val);
-                            $("#show_order").val(data.data.show_order);
+                            $("#mod_name").val(data.data.mod_name);
+                            $("#module_id").val(data.data.id);
+                            $("#mod_en_name").val(data.data.mod_en_name);
+                            $("#mod_type").val(data.data.mod_type);
+                            $("#mod_dw").val(data.data.mod_dw == null ? '' : data.data.mod_dw);
+                            $("#default_value").val(data.data.default_value);
+                            $("#min_length").val(data.data.min_length);
+                            $("#max_length").val(data.data.max_length);
+
+                            if(data.data.is_number == 1){
+                                $("#is_number").prop("checked","checked");
+                            }
+                            if(data.data.is_phone == 1){
+                                $("#is_phone").prop("checked","checked");
+                            }
+                            if(data.data.is_email == 1){
+                                $("#is_email").prop("checked","checked");
+                            }
+                            if(data.data.is_date == 1){
+                                $("#is_date").prop("checked","checked");
+                            }
 
                             $("#top_cat").val(data.first_cat);
 
@@ -417,16 +471,9 @@
                             for (var i = 0; i < lists.length; i++) {
                                 $("#sec_cat").append("<option value=\"" + lists[i].id + "\">" + lists[i].cat_name + "</option>");
                             }
-                            $("#sec_cat").val(data.data.module.cat_id);
+                            $("#sec_cat").val(data.data.cat_id);
 
-                            $("#cat_module").empty();
-                            var modules = data.data.module.category.module_list;
-                            for (var i = 0; i < modules.length; i++) {
-                                $("#cat_module").append("<option value=\"" + modules[i].id + "\">" + modules[i].mod_name + "</option>");
-                            }
-                            $("#cat_module").val(data.data.mod_id);
-
-                            $("#editForm").attr("action", "/admin/constedit/" + _id);
+                            $("#editForm").attr("action", "/admin/moduleedit/" + _id);
 
                             $("#modal-edit").modal();
                         }

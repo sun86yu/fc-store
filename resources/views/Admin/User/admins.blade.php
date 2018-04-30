@@ -131,7 +131,7 @@
 
         @component('Admin.layout.alert')
             @slot('title')
-                测试
+                删除管理员
             @endslot
 
             确定要删除该记录?

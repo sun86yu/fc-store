@@ -54,6 +54,10 @@
                                         二级分类:&nbsp;
                                         <select name="search_sec_cat" id="search_sec_cat" class="form-control input-sm">
                                             <option value="-1">全部</option>
+                                            @foreach($firstSecondCat as $loopSec)
+                                                <option value="{{ $loopSec->id  }}"
+                                                        @if ( Request::has('search_sec_cat') && Request::get('search_sec_cat') == $loopSec->id ) selected @endif>{{ $loopSec->cat_name }}</option>
+                                            @endforeach
                                         </select>
                                     </label>
                                     &nbsp;&nbsp;&nbsp;&nbsp;
@@ -72,6 +76,7 @@
                                 <th>类型</th>
                                 <th>单位</th>
                                 <th>默认值</th>
+                                <th>顺序</th>
                                 <th>数字</th>
                                 <th>电话</th>
                                 <th>邮箱</th>
@@ -94,6 +99,7 @@
                                     </td>
                                     <td>{{ $item->mod_dw }}</td>
                                     <td>{{ $item->default_value }}</td>
+                                    <td>{{ $item->show_order }}</td>
                                     <td>
                                         @if($item->is_number == 1)
                                             <span class="label label-primary">是</span>
@@ -122,7 +128,7 @@
                                             <span class="label label-danger">否</span>
                                         @endif
                                     </td>
-                                    <td>{{ $item->category->cat_name }}</td>
+                                    <td>{{\App\Models\Admin\CategoryModel::getParent($item->category->id)->cat_name}} - {{ $item->category->cat_name }}</td>
                                     <td>
                                         <a href="javascript:editItem({{$item->id}})">
                                             <i class="fa fa-edit"></i> 编辑
@@ -211,15 +217,20 @@
 
                             </div>
 
-                            <div class="form-group col-xs-6">
+                            <div class="form-group col-xs-4">
                                 <label>最小长度</label>
                                 <input type="text" id="min_length" name="min_length" class="form-control"
                                        placeholder="模块内容的最小长度">
                             </div>
-                            <div class="form-group col-xs-6">
+                            <div class="form-group col-xs-4">
                                 <label>最大长度</label>
                                 <input type="text" id="max_length" name="max_length" class="form-control"
                                        placeholder="模块内容的最大长度">
+                            </div>
+                            <div class="form-group col-xs-4">
+                                <label>显示顺序</label>
+                                <input type="text" id="show_order" name="show_order" class="form-control"
+                                       placeholder="该值越大显示越靠前">
                             </div>
                             <div class="form-group col-xs-12">
                                 <label>
@@ -335,6 +346,10 @@
                         digits: true,
                         maxlength: 8
                     },
+                    show_order: {
+                        digits: true,
+                        maxlength: 8
+                    },
                 },
                 messages: {
                     mod_name: {
@@ -350,6 +365,10 @@
                         maxlength: "最小长度不能超过 8 个字符"
                     },
                     max_length: {
+                        digits: "最大长度值必须是数字!",
+                        maxlength: "最大长度不能超过 8 个字符"
+                    },
+                    show_order: {
                         digits: "最大长度值必须是数字!",
                         maxlength: "最大长度不能超过 8 个字符"
                     },
@@ -450,6 +469,7 @@
                             $("#default_value").val(data.data.default_value);
                             $("#min_length").val(data.data.min_length);
                             $("#max_length").val(data.data.max_length);
+                            $("#show_order").val(data.data.show_order);
 
                             if(data.data.is_number == 1){
                                 $("#is_number").prop("checked","checked");

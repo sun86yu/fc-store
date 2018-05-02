@@ -202,6 +202,9 @@ class CategoryController extends Controller
         $firstCat = $request->input('search_top_cat', -1);
         $secCat = $request->input('search_sec_cat', -1);
 
+        $topCat = CategoryModel::where('cat_level', 1)->get();
+        $selTopCatId = ($topCat[0])->id;
+
         $where[] = ['is_active', 1];
         $whereIn = [];
         if ($secCat != -1) {
@@ -214,14 +217,16 @@ class CategoryController extends Controller
             }
         }
 
-        $topCat = CategoryModel::where('cat_level', 1)->get();
+        if ($firstCat != -1) {
+            $selTopCatId = $firstCat;
+        }
 
-        $firstSecondCat = CategoryModel::where(['cat_level' => 2, 'cat_parent' => ($topCat[0])->id])->get();
+        $firstSecondCat = CategoryModel::where(['cat_level' => 2, 'cat_parent' => $selTopCatId])->get();
 
         if (count($whereIn) > 0) {
-            $lists = CatModuleModel::where($where)->whereIn('cat_id', $whereIn)->with('category')->paginate($this->pageSize);
+            $lists = CatModuleModel::where($where)->whereIn('cat_id', $whereIn)->with('category')->orderBy("show_order", "desc")->paginate($this->pageSize);
         } else {
-            $lists = CatModuleModel::where($where)->with('category')->paginate($this->pageSize);
+            $lists = CatModuleModel::where($where)->with('category')->orderBy("show_order", "desc")->paginate($this->pageSize);
         }
 
         $lists = $lists->appends([
@@ -275,6 +280,9 @@ class CategoryController extends Controller
             $module->mod_type = $request->input('mod_type');
 
             $module->default_value = $request->input('default_value');
+            $module->min_length = $request->input('min_length');
+            $module->max_length = $request->input('max_length');
+            $module->show_order = $request->input('show_order');
             $module->mod_dw = $request->input('mod_dw');
 
             $module->is_number = $request->input('is_number', '') == 'on' ? 1 : 0;
@@ -476,9 +484,9 @@ class CategoryController extends Controller
 //
 //        print_r($moduleList);
         if (count($moduleList) <= 0 && ($firstCat == -1 && $secCat == -1 && $module == -1)) {
-            $lists = CatConstModel::with('module')->paginate($this->pageSize);
+            $lists = CatConstModel::with(['module', 'module.category', 'module.category.parent'])->paginate($this->pageSize);
         } else {
-            $lists = CatConstModel::whereIn('mod_id', $moduleList)->with('module')->paginate($this->pageSize);
+            $lists = CatConstModel::whereIn('mod_id', $moduleList)->with(['module', 'module.category', 'module.category.parent'])->paginate($this->pageSize);
         }
 //        $log = DB::getQueryLog();
 //        print_r($log);
@@ -491,5 +499,19 @@ class CategoryController extends Controller
 
         $constActive = true;
         return view('Admin/Category/consts', array_merge(compact('constActive', 'lists', 'topCat', 'firstSecondCat', 'defaultCatModule'), $this->getCommonParm()));
+    }
+
+    public function showCatForm(Request $request, $id)
+    {
+//        DB::connection()->enableQueryLog();
+
+        $moduleList = CatModuleModel::where("cat_id", $id)->with(["constant" => function ($query) {
+            $query->orderBy('show_order', 'desc');
+        }])->orderBy("show_order", 'desc')->get();
+
+//        $log = DB::getQueryLog();
+//        print_r($log);
+
+        return view('Admin/Category/catform', compact('moduleList'));
     }
 }

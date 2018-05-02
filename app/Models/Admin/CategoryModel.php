@@ -3,6 +3,7 @@
 namespace App\Models\Admin;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class CategoryModel extends Model
 {
@@ -28,4 +29,16 @@ class CategoryModel extends Model
         return $this->hasOne('App\Models\Admin\CategoryModel', 'id', 'cat_parent');
     }
 
+    public static function getParent($id)
+    {
+        $catKey = 'Cat_' . $id;
+        $cat = Cache::get($catKey);
+        if ($cat == null) {
+            $cat = self::with('parent')->find($id);
+            Cache::forever($catKey, $cat);
+        }
+        $parent = $cat->parent;
+
+        return $parent;
+    }
 }

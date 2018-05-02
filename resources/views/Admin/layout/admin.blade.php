@@ -237,7 +237,7 @@
         <div class="pull-right hidden-xs">
             <b>Version</b> 1.0.0
         </div>
-        <strong>Copyright &copy; 2014-2019 <a href="https://www.edeng.cn">方寸世界(北京)文化传媒有限公司</a>.</strong> All rights
+        <strong>Copyright &copy; 2014-2019 <a href="{{ env('COPY_RIGHT_URL')  }}">{{ env('COPY_RIGHT_TEXT')  }}</a>.</strong> All rights
         reserved.
     </footer>
 

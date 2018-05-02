@@ -25,7 +25,12 @@ Route::prefix('admin')->group(function () {
     Route::match(['get', 'post', 'delete'], 'role/{id}', 'Admin\AdminController@rolefunc')->where('id', '[0-9]+');
 
     Route::get('products', 'Admin\ProductController@index')->name('admin_product_list');
+    Route::match(['delete'], 'productdel/{id}', 'Admin\ProductController@destroyProduct')->where('id', '[0-9]+');
+
     Route::match(['get', 'post'], 'productadd', 'Admin\ProductController@create')->name('admin_product_add');
+    Route::match(['get', 'post'], 'productupload', 'Admin\ProductController@upload');
+    Route::get('catforminfo/{id}', 'Admin\CategoryController@showCatForm')->where('id', '[0-9]+');
+
     Route::get('orders', 'Admin\OrderController@index')->name('admin_order_list');
 
     Route::match(['get', 'post'], 'cats', 'Admin\CategoryController@index')->name('admin_category_list');

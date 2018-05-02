@@ -95,7 +95,7 @@
                                     <td>{{ $item->id }}</td>
                                     <td>{{ $item->const_text }}</td>
                                     <td>{{ $item->const_val }}</td>
-                                    <td>{{ $item->module->mod_name }}</td>
+                                    <td>{{$item->module->category->parent->cat_name}} - {{ $item->module->category->cat_name }} - {{ $item->module->mod_name }}</td>
                                     <td>{{ $item->show_order }}</td>
                                     <td>
                                         <a href="javascript:editItem({{$item->id}})">
@@ -121,7 +121,7 @@
                             </div>
                         </div>
                     </div>
-                    <input type="hidden" name="del_mod_id" id="del_mod_id" value="0"/>
+                    <input type="hidden" name="del_const_id" id="del_const_id" value="0"/>
                 </div>
             </div>
         </div>
@@ -138,7 +138,6 @@
             <div class="modal-dialog">
                 <form id="editForm" role="form" method="post" action="/admin/constedit/0">
                     <input type="hidden" name="_token" value="{{csrf_token()}}"/>
-                    <input type="hidden" name="mod_id" id="mod_id" value="0"/>
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -342,13 +341,13 @@
         });
 
         function delItem(_id) {
-            $("#del_mod_id").val(_id);
+            $("#del_const_id").val(_id);
             $("#modal-alert").modal();
         }
 
         function submitForm() {
             if ($("#editForm").valid()) {
-                var _id = $("#mod_id").val();
+                var _id = $("#const_id").val();
                 $.ajax({
                     type: "POST",
                     url: "/admin/constedit/" + _id,
@@ -367,7 +366,7 @@
         }
 
         function confirmAlert() {
-            var _id = $("#del_mod_id").val();
+            var _id = $("#del_const_id").val();
             $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('input[name="_token"]').val()}});
 
             $.ajax({

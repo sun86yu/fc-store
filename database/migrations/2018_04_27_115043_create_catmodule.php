@@ -22,6 +22,7 @@ class CreateCatmodule extends Migration
             $table->string('mod_dw', 45)->nullable();
             $table->string('default_value', 45)->nullable();
             $table->string('mod_en_name', 45);
+            $table->unsignedInteger('show_order')->default(1);
             $table->unsignedTinyInteger('is_number')->default(0);
             $table->unsignedTinyInteger('min_length')->default(1);
             $table->unsignedTinyInteger('max_length')->default(10);

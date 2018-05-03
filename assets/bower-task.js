@@ -43,6 +43,14 @@ module.exports = function () {
             .pipe(gulp.dest(path.join(dist_path, 'bootstrap/js/')));
     });
 
+    gulp.task('bower:bootstrap-datepicker', function () {
+        return gulp.src(path.join(bower_path, 'bootstrap-datepicker/dist/{js/bootstrap-datepicker.min.js,locales/bootstrap-datepicker.zh-CN.min.js}'))
+            .pipe(gulp.dest(path.join(dist_path, 'bootstrap-datepicker/')));
+    });
+    gulp.task('bower:bootstrap-datepicker-css', function () {
+        return gulp.src(path.join(bower_path, 'bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css'))
+            .pipe(gulp.dest(path.join(dist_path, 'bootstrap-datepicker/')));
+    });
     gulp.task('bower:bootstrap-datepicker-range', function () {
         return gulp.src(path.join(bower_path, 'bootstrap-daterangepicker/daterangepicker.js'))
             .pipe(uglify())
@@ -155,6 +163,8 @@ module.exports = function () {
         'bower:bootstrap-css',
         'bower:bootstrap-js',
         'bower:bootstrap-font',
+        'bower:bootstrap-datepicker',
+        'bower:bootstrap-datepicker-css',
         'bower:bootstrap-datepicker-range',
         'bower:bootstrap-datepicker-range-css',
         'bower:iconicons-css',

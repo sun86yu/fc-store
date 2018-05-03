@@ -41,4 +41,19 @@ class CategoryModel extends Model
 
         return $parent;
     }
+
+    public static function getBrotherCat($id)
+    {
+        $parent = self::getParent($id);
+
+        $catKey = 'Cat_Bro_' . $id;
+        $catList = Cache::get($catKey);
+
+        if ($catList == null) {
+            $catList = self::where(['is_active' => 1, 'cat_parent' => $parent->id])->get();
+            Cache::forever($catKey, $catList);
+        }
+
+        return $catList;
+    }
 }

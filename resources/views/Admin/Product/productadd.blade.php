@@ -43,7 +43,7 @@
                             <!-- text input -->
                             <div class="form-group col-xs-12">
                                 <label>标题</label>
-                                <input type="text" value="@if(isset($product)) {{ $product->pro_name }} @endif" name="pro_name" class="form-control" placeholder="请输入标题">
+                                <input type="text" value="@if(isset($product)){{ $product->pro_name }}@endif" name="pro_name" class="form-control" placeholder="请输入标题">
                             </div>
 
                             <div class="form-group col-xs-12">
@@ -60,17 +60,36 @@
                                 <br>
 
                                 <table role="presentation" class="table table-striped">
-                                    <tbody class="files"></tbody>
+                                    <tbody class="files">
+                                        @if(isset($product) and strlen($product->pro_img) > 1)
+                                            @php
+                                                $imgList = explode(',', $product->pro_img)
+                                            @endphp
+                                            @foreach($imgList as $key => $loopImg)
+                                            <tr class="template-download" id="imgBox_{{$key}}">
+                                                <td>
+                                                    <div><span class="label"><img height="200px" src="{{$loopImg}}" /> </span> </div>
+                                                </td>
+                                                <td>
+                                                    <button onclick="delImg({{$key}});return false;" class="btn btn-warning">
+                                                        <i class="glyphicon glyphicon-ban-circle"></i>
+                                                        <span>删除</span>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                        @endif
+                                    </tbody>
                                 </table>
-                                <input type="hidden" name="product_id" value="@if(isset($product)) {{ $product->id }} @endif" />
-                                <input type="hidden" value="@if(isset($product)) {{ $product->pro_img }} @endif" name="pro_img" id="pro_img"/>
+                                <input type="hidden" name="product_id" value="@if(isset($product)){{ $product->id }}@endif" />
+                                <input type="hidden" value="@if(isset($product)){{ $product->pro_img }}@endif" name="pro_img" id="pro_img"/>
                             </div>
 
                             <div class="form-group col-xs-6">
                                 <label>一级分类</label>
                                 <select class="form-control" name="top_cat" id="top_cat" onchange="setCatSon()">
                                     @foreach($topCat as $loopTop)
-                                        <option value="{{ $loopTop->id  }}">{{ $loopTop->cat_name }}</option>
+                                        <option @if(isset($product) and isset($product->category) and $product->category->parent->id == $loopTop->id) selected @endif value="{{ $loopTop->id  }}">{{ $loopTop->cat_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -78,7 +97,7 @@
                                 <label>二级分类</label>
                                 <select class="form-control" name="sec_cat" id="sec_cat" onchange="setModuleForm()">
                                     @foreach($firstSecondCat as $loopSec)
-                                        <option value="{{ $loopSec->id  }}">{{ $loopSec->cat_name }}</option>
+                                        <option @if(isset($product) and $product->cat_id == $loopSec->id) selected @endif value="{{ $loopSec->id  }}">{{ $loopSec->cat_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -89,15 +108,15 @@
 
                             <div class="form-group col-xs-12">
                                 <label>价格</label>
-                                <input value="@if(isset($product)) {{ $product->price }} @endif" type="text" name="price" class="form-control" placeholder="商品价格">
+                                <input value="@if(isset($product)){{ $product->price}}@endif" type="text" name="price" class="form-control" placeholder="商品价格">
                             </div>
                             <div class="form-group col-xs-12">
                                 <label>库存</label>
-                                <input value="@if(isset($product)) {{ $product->remain_cnt }} @endif" type="text" name="remain_cnt" class="form-control" placeholder="库存数量">
+                                <input value="@if(isset($product)){{$product->remain_cnt}}@endif" type="text" name="remain_cnt" class="form-control" placeholder="库存数量">
                             </div>
                             <div class="form-group col-xs-12">
                                 <label>已售</label>
-                                <input value="@if(isset($product)) {{ $product->saled_cnt }} @endif" type="text" name="saled_cnt" class="form-control" placeholder="已售数量">
+                                <input value="@if(isset($product)){{ $product->saled_cnt}}@endif" type="text" name="saled_cnt" class="form-control" placeholder="已售数量">
                             </div>
 
                             <!-- select -->
@@ -157,7 +176,7 @@
     <!-- The template to display files available for download -->
     <script id="template-download" type="text/x-tmpl">
 {% for (var i=0, file; file=o.files[i]; i++) { %}
-    {% $("#product_img").val($("#product_img").val() + "," + file.name); %}
+    {% $("#pro_img").val($("#pro_img").val() + "," + file.name); %}
     <tr class="template-download fade">
         <td>
             {% if (file.error) { %}
@@ -195,6 +214,21 @@
             src="{{ URL::asset('/components/jquery-validation/jquery.validate.min.js') }}"></script>
 
     <script>
+        function delImg(idx){
+            var imgStr = $("#pro_img").val();
+
+            var imgArr = imgStr.split(',');
+            var newArr = new Array();
+            for(var i = 0;i<imgArr.length;i++){
+                if(i == idx){
+                    continue;
+                }
+                newArr.push(imgArr[i]);
+            }
+            var newStr = newArr.join(',');
+            $("#imgBox_" + idx).remove();
+            $("#pro_img").val(newStr);
+        }
         function submitProduct() {
             if ($("#productForm").valid()) {
                 var markupStr = $('#summernote').summernote('code');
@@ -232,6 +266,7 @@
             });
         }
 
+
         function setModuleForm(){
             var selectCat = $("#sec_cat").val();
 
@@ -242,6 +277,42 @@
                     $("#catFormBox").empty();
 
                     $(data).appendTo('#catFormBox');
+
+                    @if(isset($product) && $product->id > 0)
+                        @foreach($product->category->moduleList as $loopModule)
+                            @if($loopModule->is_active != 1)
+                                @continue
+                            @endif
+
+                            @php
+                                $extInfo = $product->info;
+                                $extInfoArr = json_decode($extInfo, true);
+                            @endphp
+
+                            @switch ($loopModule->mod_type)
+                                @case (1)
+                                    $("#{{$loopModule->mod_en_name}}").val('{{$extInfoArr[$loopModule->id]}}')
+                                    @break
+                                @case (2)
+                                    $("#{{$loopModule->mod_en_name}}").val('{{$extInfoArr[$loopModule->id]}}')
+                                    @break
+                                @case (3)
+                                    $("#{{$loopModule->mod_en_name}}").val('{{$extInfoArr[$loopModule->id]}}')
+                                    @break
+                                @case (4)
+                                    $("input:radio[name={{$loopModule->mod_en_name}}][value={{$extInfoArr[$loopModule->id]}}]").prop("checked","checked")
+                                    @break
+                                @case (5)
+                                    @foreach($extInfoArr[$loopModule->id] as $loopVal)
+                                        $("input:checkbox[name='{{$loopModule->mod_en_name}}[]'][value={{$loopVal}}]").attr("checked","checked")
+                                    @endforeach
+                                    @break
+                                @case (6)
+                                    $("#{{$loopModule->mod_en_name}}").val('{{$extInfoArr[$loopModule->id]}}')
+                                    @break
+                            @endswitch
+                        @endforeach
+                    @endif
                 }
             });
         }

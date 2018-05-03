@@ -162,6 +162,7 @@ return [
         App\Providers\StringServiceProvider::class,
         App\Providers\ShareDataProvider::class,
         App\Providers\RoleRightProvider::class,
+        Laravel\Passport\PassportServiceProvider::class,
 
     ],
 

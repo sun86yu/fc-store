@@ -484,9 +484,9 @@ class CategoryController extends Controller
 //
 //        print_r($moduleList);
         if (count($moduleList) <= 0 && ($firstCat == -1 && $secCat == -1 && $module == -1)) {
-            $lists = CatConstModel::with(['module', 'module.category', 'module.category.parent'])->paginate($this->pageSize);
+            $lists = CatConstModel::with(['module', 'module.category', 'module.category.parent'])->orderBy("mod_id", "desc")->orderBy("show_order", 'desc')->paginate($this->pageSize);
         } else {
-            $lists = CatConstModel::whereIn('mod_id', $moduleList)->with(['module', 'module.category', 'module.category.parent'])->paginate($this->pageSize);
+            $lists = CatConstModel::whereIn('mod_id', $moduleList)->with(['module', 'module.category', 'module.category.parent'])->orderBy("mod_id", "desc")->orderBy("show_order", 'desc')->paginate($this->pageSize);
         }
 //        $log = DB::getQueryLog();
 //        print_r($log);
@@ -505,7 +505,7 @@ class CategoryController extends Controller
     {
 //        DB::connection()->enableQueryLog();
 
-        $moduleList = CatModuleModel::where("cat_id", $id)->with(["constant" => function ($query) {
+        $moduleList = CatModuleModel::where(["is_active" => 1,"cat_id" => $id])->with(["constant" => function ($query) {
             $query->orderBy('show_order', 'desc');
         }])->orderBy("show_order", 'desc')->get();
 

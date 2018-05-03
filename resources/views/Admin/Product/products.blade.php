@@ -67,7 +67,7 @@
                                 <td>{{$item->remain_cnt}}</td>
                                 <td>{{$item->saled_cnt}}</td>
                                 <td>
-                                    <a href="#">
+                                    <a href="/admin/productedit/{{$item->id}}">
                                         <i class="fa fa-edit"></i> 编辑
                                     </a>
                                     &nbsp;|&nbsp;

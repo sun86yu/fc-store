@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Admin\CatModuleModel;
 use App\Models\Admin\ProductModel;
 use Illuminate\Http\Request;
 use App\Http\Traits\AdminTools;
 use Illuminate\Support\Facades\Config;
 use App\Models\Admin\CategoryModel;
+use Illuminate\Support\Facades\Validator;
 use App\Jobs\LogAction;
 use App\Http\Controllers\Controller;
 
@@ -35,7 +37,7 @@ class ProductController extends Controller
         return view('Admin/Product/products', array_merge(compact('productActive', 'lists'), $this->getCommonParm()));
     }
 
-    public function create()
+    public function create(Request $request, $id = 0)
     {
         $this->pageTitle = '商品管理';
         $this->pageSubTitle = '新建商品';
@@ -47,10 +49,101 @@ class ProductController extends Controller
 
         $topCat = CategoryModel::where('cat_level', 1)->get();
 
-        $secondCatParent = $topCat[0]->id;
-        $firstSecondCat = CategoryModel::where(['cat_level' => 2, 'cat_parent' => $secondCatParent])->get();
+        $product = new ProductModel();
 
-        return view('Admin/Product/productadd', array_merge(compact('productAddActive', 'topCat', 'firstSecondCat'), $this->getCommonParm()));
+        if ($request->has('product_id')) {
+            $id = $request->input('product_id');
+        }
+
+        if ($id > 0) {
+            $product = ProductModel::with(['category' => function ($query) {
+                $query->where('is_active', 1);
+            }])->with('category.parent')->with(['category.moduleList' => function ($query) {
+                $query->where('is_active', 1);
+            }])->find($id);
+            $firstSecondCat = CategoryModel::getBrotherCat($product->cat_id);
+        } else {
+            $firstSecondCat = CategoryModel::where(['cat_level' => 2, 'cat_parent' => $topCat[0]->id])->get();
+        }
+
+        if ($request->isMethod('POST')) {
+
+            if ($request->input('product_id') == 0) {
+                $product->create_time = date("Y-m-d H:i:s");
+            }
+
+            $product->pro_name = $request->input('pro_name');
+            $product->cat_id = $request->input('sec_cat');
+            $product->info = '';
+            $product->price = $request->input('price');
+            $product->remain_cnt = $request->input('remain_cnt');
+            $product->saled_cnt = $request->input('saled_cnt');
+            $product->status = $request->input('product_status');
+            $product->content = $request->input('product_content');
+
+            $imgStr = $request->input('pro_img');
+
+            $imgArr = explode(',', $imgStr);
+
+            $pro_img = '';
+            if (is_array($imgArr) && count($imgArr) > 0) {
+                foreach ($imgArr as $item) {
+                    if (strlen($item) > 3) {
+                        $pro_img .= $item . ',';
+                    }
+                }
+            }
+
+            if (strlen($pro_img) > 0) {
+                $product->pro_img = substr($pro_img, 0, strlen($pro_img) - 1);
+            }
+
+            // 取扩展信息并存储
+            $modList = CatModuleModel::where(['is_active' => 1, 'cat_id' => $product->cat_id])->get();
+
+            $ext = [];
+            foreach ($modList as $loopModule) {
+                $loopName = $loopModule->mod_en_name;
+
+                $ext[$loopModule->id] = $request->input($loopName);
+            }
+
+            $product->info = json_encode($ext);
+
+            // 添加或编辑产品信息
+            // 名称长度检测
+            $input = [
+                'pro_name' => $product->pro_name,
+                'price' => $product->price,
+                'remain_cnt' => $product->remain_cnt,
+                'saled_cnt' => $product->saled_cnt,
+            ];
+            $rules = [
+                'pro_name' => 'required|max:100',
+                'remain_cnt' => 'required|numeric',
+                'saled_cnt' => 'required|numeric',
+                'price' => 'required|numeric',
+            ];
+            $messages = [
+                'required' => ':attribute 值必须填写.',
+                'max' => ':attribute 长度不能超过 :max.',
+                'numeric' => ':attribute 必须是数字.',
+            ];
+
+            $validator = Validator::make($input, $rules, $messages);
+
+            if ($validator->fails()) {
+                $error = $validator->errors()->first();
+
+                return view('Admin/Product/productadd', array_merge(compact('productAddActive', 'error', 'product', 'topCat', 'firstSecondCat'), $this->getCommonParm()));
+            }
+
+            $product->save();
+
+            return redirect()->route('admin_product_list');
+        }
+
+        return view('Admin/Product/productadd', array_merge(compact('productAddActive', 'topCat', 'firstSecondCat', 'product'), $this->getCommonParm()));
     }
 
     /**

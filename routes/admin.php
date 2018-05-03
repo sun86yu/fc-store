@@ -28,6 +28,7 @@ Route::prefix('admin')->group(function () {
     Route::match(['delete'], 'productdel/{id}', 'Admin\ProductController@destroyProduct')->where('id', '[0-9]+');
 
     Route::match(['get', 'post'], 'productadd', 'Admin\ProductController@create')->name('admin_product_add');
+    Route::match(['get', 'post'], 'productedit/{id}', 'Admin\ProductController@create')->where('id', '[0-9]+');
     Route::match(['get', 'post'], 'productupload', 'Admin\ProductController@upload');
     Route::get('catforminfo/{id}', 'Admin\CategoryController@showCatForm')->where('id', '[0-9]+');
 

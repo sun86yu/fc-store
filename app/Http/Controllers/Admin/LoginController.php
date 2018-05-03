@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\Http\Request;
+use Laravel\Passport\HasApiTokens;
 use App\Http\Controllers\Controller;
 
 class LoginController extends Controller
 {
+    use HasApiTokens;
+
     /**
      * Display a listing of the resource.
      *

@@ -43,13 +43,18 @@ class TestController extends Controller
         return 'do somethin!';
     }
 
-    public function show()
+    public function login()
     {
-        return 'show';
+        return 'login';
     }
 
-    public function create()
+    public function register()
     {
-        return 'create';
+        return 'register';
+    }
+
+    public function details()
+    {
+        return 'details';
     }
 }

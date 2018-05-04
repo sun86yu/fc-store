@@ -13,3 +13,7 @@
 
 // 引入其它的路由配置文件
 require base_path('routes/admin.php');
+
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');

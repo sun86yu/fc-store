@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Admin\UserModel;
 
 class UserController extends Controller
 {
@@ -12,6 +12,7 @@ class UserController extends Controller
     {
 //        return redirect()->route('admin_user_add');
         $userActive = true;
+        $list = UserModel::with('address')->with('orders')->get();
         return view('Admin/User/users', compact('userActive'));
     }
 

@@ -25,12 +25,5 @@ class AuthServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->registerPolicies();
-        Passport::routes();
-        // 令牌过期时间
-        Passport::tokensExpireIn(now()->addDays(15));
-        // 令牌自动刷新过期时间
-        Passport::refreshTokensExpireIn(now()->addDays(30));
-
-        //
     }
 }

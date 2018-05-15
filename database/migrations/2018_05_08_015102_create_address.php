@@ -22,7 +22,7 @@ class CreateAddress extends Migration
             $table->string('ad_detail', 500);
             $table->unsignedTinyInteger('is_default')->default(0);
             $table->string('rec_name', 45);
-            $table->text('rec_phone', 20);
+            $table->string('rec_phone', 20);
             $table->index('user_id');
         });
     }

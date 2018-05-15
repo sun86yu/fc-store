@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\CacheDataModifyedEvent;
+use App\Http\Controllers\Controller;
 use App\Http\Traits\AdminTools;
 use App\Jobs\LogAction;
 use App\Models\Admin\NewsModel;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Validator;
 
@@ -129,6 +131,9 @@ class ArticleController extends Controller
 
             $article->save();
 
+            // 清除缓存事件
+            event(new CacheDataModifyedEvent('home_gallary'));
+
             $nowUserId = $this->getNowUser();
 
             $act['user_id'] = $nowUserId;
@@ -229,6 +234,9 @@ class ArticleController extends Controller
 
             $queueName = Config::get('constants.LOG_QUEUE_NAME');
             LogAction::dispatch($act)->onQueue($queueName);
+
+            // 清除缓存事件
+            event(new CacheDataModifyedEvent('home_gallary'));
 
             $rst['code'] = 100;
             return json_encode($rst);

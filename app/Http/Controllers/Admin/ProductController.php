@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
+use App\Http\Traits\AdminTools;
+use App\Jobs\ElasticSearchUpdate;
+use App\Jobs\LogAction;
+use App\Models\Admin\CategoryModel;
 use App\Models\Admin\CatModuleModel;
 use App\Models\Admin\ProductModel;
 use Illuminate\Http\Request;
-use App\Http\Traits\AdminTools;
 use Illuminate\Support\Facades\Config;
-use App\Models\Admin\CategoryModel;
 use Illuminate\Support\Facades\Validator;
-use App\Jobs\LogAction;
-use App\Http\Controllers\Controller;
 
 class ProductController extends Controller
 {
@@ -140,6 +141,10 @@ class ProductController extends Controller
 
             $product->save();
 
+            // 更新 ES
+            $queueName = Config::get('constants.ESEARCH_QUEUE_NAME');
+            ElasticSearchUpdate::dispatch($product, $product->id > 0 ? ElasticSearchUpdate::$OPER_UP : ElasticSearchUpdate::$OPER_ADD)->onQueue($queueName);
+
             return redirect()->route('admin_product_list');
         }
 
@@ -198,6 +203,9 @@ class ProductController extends Controller
 
             $queueName = Config::get('constants.LOG_QUEUE_NAME');
             LogAction::dispatch($act)->onQueue($queueName);
+
+            $queueName = Config::get('constants.ESEARCH_QUEUE_NAME');
+            ElasticSearchUpdate::dispatch(ProductModel::find($id), ElasticSearchUpdate::$OPER_DEL)->onQueue($queueName);
 
             $rst['code'] = 100;
             return json_encode($rst);

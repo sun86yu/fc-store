@@ -51,6 +51,7 @@ return [
         ],
     ],
     'LOG_QUEUE_NAME' => 'sys_logs',
+    'ESEARCH_QUEUE_NAME' => 'goods_search',
     'DEFAULT_PWD' => '123456',
     'CAT_MODULE_TYPE_LIST' => [
         1 => '文本框',

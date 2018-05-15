@@ -117,4 +117,11 @@ return [
 
     ],
 
+    'elasticsearch' => [
+        'host' => '47.52.204.129',
+        'port' => '9200',
+        'index' => 'fc-store',
+        'type' => 'goods',
+    ]
+
 ];

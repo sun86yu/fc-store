@@ -43,7 +43,7 @@
                             <!-- text input -->
                             <div class="form-group">
                                 <label>标题</label>
-                                <input type="text" value="@if(isset($article)) {{ $article->title }} @endif" name="article_title" class="form-control" placeholder="请输入标题">
+                                <input type="text" value="@if(isset($article)) {{ $article->title }}@endif" name="article_title" class="form-control" placeholder="请输入标题">
                             </div>
 
                             <div class="form-group">

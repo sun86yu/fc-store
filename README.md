@@ -1,7 +1,8 @@
 # fc-store
 使用 lavavel 作为框架，基于 adminlte 的前台界面。
 
-##启动项目
+启动项目
+===
 1. 安装 php 依赖(初始化项目时必须执行).如果项目更新时 composer.json 有变动，则需要执行 ```composer install```
 2. 安装 nodejs 依赖(初始化项目时必须执行).如果项目更新时 package.json 有变动，则需要执行 ```npm install```
 3. 安装前台依赖包(初始化项目时必须执行).项目更新后,如果发现 bower.json 有变更，则需要执行 ```bower install```
